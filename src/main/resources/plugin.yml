@@ -6,6 +6,6 @@ description: SimpleSchematics
 #depend: [FastAsyncWorldEdit]
 
 commands:
-  sc:
+  s:
     description: SimpleSchematics command
 

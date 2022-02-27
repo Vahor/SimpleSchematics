@@ -4,6 +4,7 @@ plugins {
     id 'java-library'
 
     id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "io.freefair.lombok" version "6.4.1"
 
     id 'idea'
 }
@@ -11,15 +12,24 @@ plugins {
 repositories {
     mavenCentral()
 
-    maven { url "https://papermc.io/repo/repository/maven-public/" }
+
+    maven {
+        name 'Paper'
+        url "https://repo.destroystokyo.com/repository/maven-public/"
+    }
 }
 
 dependencies {
-    compileOnly "io.papermc.paper:paper-api:1.18.1-R0.1-SNAPSHOT"
+    compileOnly "io.papermc.paper:paper-api:1.18-R0.1-SNAPSHOT"
+    compileOnly "com.fastasyncworldedit:FastAsyncWorldEdit-Bukkit:2.0.1"
 
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testImplementation 'org.mockito:mockito-core:4.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+
+    testRuntimeOnly "io.papermc.paper:paper-api:1.18-R0.1-SNAPSHOT"
+    testRuntimeOnly "com.fastasyncworldedit:FastAsyncWorldEdit-Bukkit:2.0.1"
 }
 
 
@@ -47,8 +57,8 @@ processResources {
     versionProps.load(new FileInputStream(versionFile))
     def major = versionProps['major'].toInteger()
     def minor = versionProps['minor'].toInteger()
-    def patch = versionProps['patch'].toInteger() + 1
-    versionProps['patch'] = minor.toString()
+    def patch = versionProps['patch'].toInteger()// + 1
+    versionProps['patch'] = patch.toString()
     versionProps.store(versionFile.newWriter(), null)
 
     project.version = major + "." + minor + "." + patch
