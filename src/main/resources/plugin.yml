@@ -1,0 +1,11 @@
+name: SimpleSchematics
+main: fr.vahor.SimpleSchematics
+version: '${version}'
+author: Vahor
+description: SimpleSchematics
+#depend: [FastAsyncWorldEdit]
+
+commands:
+  sc:
+    description: SimpleSchematics command
+

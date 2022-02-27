@@ -1,0 +1,71 @@
+//file:noinspection SpellCheckingInspection
+plugins {
+    id 'java'
+    id 'java-library'
+
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+
+    id 'idea'
+}
+
+repositories {
+    mavenCentral()
+
+    maven { url "https://papermc.io/repo/repository/maven-public/" }
+}
+
+dependencies {
+    compileOnly "io.papermc.paper:paper-api:1.18.1-R0.1-SNAPSHOT"
+
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+}
+
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
+}
+
+configurations.all {
+    attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
+}
+
+tasks.compileJava.configure {
+    options.release.set(8)
+}
+
+test {
+    useJUnitPlatform()
+}
+
+processResources {
+    def versionFile = file('version.properties')
+
+    def Properties versionProps = new Properties()
+
+    versionProps.load(new FileInputStream(versionFile))
+    def major = versionProps['major'].toInteger()
+    def minor = versionProps['minor'].toInteger()
+    def patch = versionProps['patch'].toInteger() + 1
+    versionProps['patch'] = minor.toString()
+    versionProps.store(versionFile.newWriter(), null)
+
+    project.version = major + "." + minor + "." + patch
+    expand(project.properties)
+}
+
+
+shadowJar {
+    dependsOn processResources
+
+
+    archiveFileName = "${archiveBaseName}-${archiveVersion}.${archiveExtension}"
+    minimize()
+}
+
+build {
+    dependsOn test
+    dependsOn shadowJar
+
+}
