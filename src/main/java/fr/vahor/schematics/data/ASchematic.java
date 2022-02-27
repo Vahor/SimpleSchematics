@@ -3,6 +3,8 @@ package fr.vahor.schematics.data;
 import fr.vahor.API;
 import lombok.ToString;
 
+import java.io.File;
+
 @ToString(of = {"name"})
 public abstract class ASchematic {
 
@@ -31,9 +33,15 @@ public abstract class ASchematic {
 
     public String getPath(String separator) {
         String path = "";
-        if(parent != null && parent.getParent() != null) // Don't want root folder in path
+        if(parent != null && parent.getParent() != null)
             path += parent.getPath(separator) + separator;
         path += name;
         return path;
+    }
+
+    public File getAsFile() {
+        String path = getPath(API.SYSTEM_SEPERATOR);
+        File file = new File(API.getConfiguration().getSchematicsFolderPath(), path);
+        return file.getAbsoluteFile();
     }
 }

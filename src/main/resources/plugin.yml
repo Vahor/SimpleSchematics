@@ -3,7 +3,7 @@ main: fr.vahor.SimpleSchematics
 version: '${version}'
 author: Vahor
 description: SimpleSchematics
-#depend: [FastAsyncWorldEdit]
+depend: [FastAsyncWorldEdit]
 
 commands:
   s:

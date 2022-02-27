@@ -20,7 +20,7 @@ public class Config {
     public void reload(FileConfiguration configuration) {
         schematicsFolderPath = configuration.getString("folder");
         toolIconMaterial = configuration.getString("toolIconMaterial");
-        seperator = configuration.getString("seperator");
+        seperator = configuration.getString("separator");
         seperatorPattern = Pattern.compile(String.format("\\%s", seperator));
     }
 }
