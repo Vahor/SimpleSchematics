@@ -2,6 +2,7 @@ package fr.vahor.commands;
 
 import fr.vahor.API;
 import fr.vahor.exceptions.FolderNotFoundException;
+import fr.vahor.i18n.Message;
 import fr.vahor.permissions.Permissions;
 import fr.vahor.schematics.SchematicsPlayer;
 import fr.vahor.utils.ItemBuilder;
@@ -40,7 +41,7 @@ public class CommandHandler implements CommandExecutor {
 
                 // Help info for commands
                 if (args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("c")) {
-                    player.sendMessage("Help create doc");
+                    player.sendMessage("todo Help create doc");
                     return true;
                 }
 
@@ -60,7 +61,7 @@ public class CommandHandler implements CommandExecutor {
                 if (args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("c")) {
 
                     if (alreadyExists) {
-                        player.sendMessage("Folder already exists");
+                        player.sendMessage(Message.PREFIX + Message.FOLDER_ALREADY_EXISTS.toString());
                         return true;
                     }
 
@@ -73,14 +74,14 @@ public class CommandHandler implements CommandExecutor {
                 }
                 else if (args[0].equalsIgnoreCase("delete") || args[0].equalsIgnoreCase("d")) {
                     if (!alreadyExists) {
-                        player.sendMessage("Folder don't exists");
+                        player.sendMessage(Message.PREFIX + Message.FOLDER_DONT_EXIST.toString());
                         return true;
                     }
                 }
 
                 else if (args[0].equalsIgnoreCase("move") || args[0].equalsIgnoreCase("mv")) {
                     if (!alreadyExists) {
-                        player.sendMessage("Folder don't exists");
+                        player.sendMessage(Message.PREFIX + Message.FOLDER_DONT_EXIST.toString());
                         return true;
                     }
                 }
