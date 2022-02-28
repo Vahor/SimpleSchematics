@@ -1,6 +1,7 @@
 package fr.vahor.inventory;
 
 import fr.vahor.API;
+import fr.vahor.i18n.Message;
 import fr.vahor.schematics.data.ASchematic;
 import fr.vahor.schematics.data.SchematicFolder;
 import fr.vahor.utils.ItemBuilder;
@@ -14,7 +15,7 @@ public class SchematicInventory extends InventoryBuilder {
     private SchematicFolder currentFolder;
 
     public SchematicInventory(Player player) {
-        super(player, Bukkit.createInventory(player, 54, "todo title"));
+        super(player, Bukkit.createInventory(player, 54, Message.INVENTORY_TITLE.toString()));
         this.currentFolder = API.getRootSchematicFolder();
 
         build();
@@ -39,7 +40,10 @@ public class SchematicInventory extends InventoryBuilder {
 
             if(child instanceof SchematicFolder) {
                 setItem(slot++,
-                        new ItemBuilder(Material.BOOK).setName(child.getName()).build(),
+                        new ItemBuilder(Material.BOOK)
+                                .setName(Message.INVENTORY_FOLDER_NAME.toString().replace("{name}", child.getName()))
+                                .setLore(Message.INVENTORY_FOLDER_LORE.toString().split("\n"))
+                                .build(),
                         (event) -> {
                             event.setCancelled(true);
                             currentFolder = (SchematicFolder) child;
@@ -47,7 +51,10 @@ public class SchematicInventory extends InventoryBuilder {
                         });
             }else {
                 setItem(slot++,
-                        new ItemBuilder(Material.PAPER).setName(child.getName()).build(),
+                        new ItemBuilder(Material.PAPER)
+                                .setName(Message.INVENTORY_SCHEMATIC_NAME.toString().replace("{name}", child.getName()))
+                                .setLore(Message.INVENTORY_SCHEMATIC_LORE.toString().split("\n"))
+                                .build(),
                         (event) -> {
                             event.setCancelled(true);
                             player.sendMessage(child.getName());
@@ -66,7 +73,9 @@ public class SchematicInventory extends InventoryBuilder {
     public void addGoBackButton() {
         if(currentFolder.getParent() != null){
             setItem(49,
-                    new ItemBuilder(Material.ARROW).setName("todo back").build(),
+                    new ItemBuilder(Material.ARROW)
+                            .setName(Message.INVENTORY_GO_BACK.toString())
+                            .build(),
                     (event) -> {
                         event.setCancelled(true);
                         currentFolder = currentFolder.getParent();
