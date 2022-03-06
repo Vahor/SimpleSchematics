@@ -1,17 +1,21 @@
 package fr.vahor;
 
+import fr.vahor.utils.Schema;
 import lombok.Getter;
+import lombok.ToString;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.regex.Pattern;
 
 @Getter
+@ToString
 public class Config {
 
     private String schematicsFolderPath;
     private String toolIconMaterial;
-    private String seperator;
-    private Pattern seperatorPattern;
+    private String separator;
+    private Pattern separatorPattern;
+    private int thumbnailSize;
 
     public Config(FileConfiguration configuration) {
         reload(configuration);
@@ -20,7 +24,9 @@ public class Config {
     public void reload(FileConfiguration configuration) {
         schematicsFolderPath = configuration.getString("folder");
         toolIconMaterial = configuration.getString("toolIconMaterial");
-        seperator = configuration.getString("separator");
-        seperatorPattern = Pattern.compile(String.format("\\%s", seperator));
+        thumbnailSize    = configuration.getInt("thumbnailSize");
+        separator        = configuration.getString("separator");
+        separatorPattern     = Pattern.compile(String.format("\\%s", separator));
+        Schema.generatePattern(separator);
     }
 }

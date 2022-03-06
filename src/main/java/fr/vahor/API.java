@@ -1,40 +1,48 @@
 package fr.vahor;
 
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.data.DataException;
-import com.sk89q.worldedit.schematic.SchematicFormat;
+import com.boydti.fawe.object.exception.FaweException;
+import com.boydti.fawe.object.schematic.Schematic;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
+import com.sk89q.worldedit.math.transform.AffineTransform;
+import com.sk89q.worldedit.math.transform.Transform;
 import fr.vahor.exceptions.FolderNotFoundException;
 import fr.vahor.exceptions.InvalidFolderNameException;
+import fr.vahor.fawe.PNGWriter;
+import fr.vahor.schematics.Direction;
+import fr.vahor.schematics.RotationMode;
 import fr.vahor.schematics.SchematicsPlayer;
 import fr.vahor.schematics.data.ASchematic;
 import fr.vahor.schematics.data.SchematicFolder;
 import fr.vahor.schematics.data.SchematicWrapper;
+import fr.vahor.schematics.data.Thumbnail;
 import fr.vahor.utils.Schema;
 import lombok.Getter;
 import org.apache.commons.io.FileUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class API {
 
+    public static final Random RANDOM = new Random();
     private static final Map<UUID, SchematicsPlayer> playerMap = new HashMap<>();
     private static final Map<String, SchematicFolder> foldersByName = new HashMap<>();
     @Getter private static SchematicFolder rootSchematicFolder;
-    @Getter private static WorldEditPlugin worldEdit;
     @Getter private static Config configuration;
     @Getter private static Logger logger;
 
-    public static final String SYSTEM_SEPERATOR = System.getProperty("file.separator");
+    public static final String SYSTEM_SEPARATOR = System.getProperty("file.separator");
 
     @Getter private static Material toolIcon;
 
@@ -49,6 +57,10 @@ public class API {
 
     public static void initializeLogger(Logger logger) {
         API.logger = logger;
+    }
+
+    public static Collection<SchematicsPlayer> getPlayers() {
+        return playerMap.values();
     }
 
     public static void init() {
@@ -67,10 +79,9 @@ public class API {
     }
 
     public static SchematicsPlayer addPlayer(UUID uuid) {
-        if (!playerMap.containsKey(uuid)) {
-            return playerMap.put(uuid, new SchematicsPlayer(uuid));
-        }
-        return null;
+        SchematicsPlayer schematicsPlayer = new SchematicsPlayer(uuid);
+        playerMap.put(uuid, schematicsPlayer);
+        return schematicsPlayer;
     }
 
     public static void removePlayer(UUID uuid) {
@@ -81,22 +92,14 @@ public class API {
         return foldersByName.get(name);
     }
 
-    public static void loadWorldEdit() {
-        try {
-            worldEdit = (WorldEditPlugin) Bukkit.getServer().getPluginManager().getPlugin("WorldEdit");
-        } catch (ClassCastException e) {
-            getLogger().severe("WorldEdit plugin not found.");
-            throw e;
-        }
-    }
-
     public static void loadSchematics() {
+        foldersByName.clear();
         File directory = new File(configuration.getSchematicsFolderPath());
         if (!directory.exists()) {
-            getLogger().severe("Schematic folder not found : " + directory.getAbsolutePath());
-            return;
+            directory.mkdirs();
         }
         rootSchematicFolder = loadSchematicsInFolder(directory);
+        foldersByName.put(configuration.getSeparator(), rootSchematicFolder);
     }
 
     private static SchematicFolder loadSchematicsInFolder(File directory) {
@@ -126,10 +129,10 @@ public class API {
         // Using file path as recursion is not finished here
         String pathInSystem = directory.getPath()
                 .replaceFirst(configuration.getSchematicsFolderPath(), "")
-                .replace(SYSTEM_SEPERATOR, configuration.getSeperator())
-                .replaceFirst(configuration.getSeperator(), "");
+                .replace(SYSTEM_SEPARATOR, configuration.getSeparator())
+                .replaceFirst(configuration.getSeparator(), "");
 
-        if (pathInSystem.isEmpty()) pathInSystem = configuration.getSeperator();
+        if (pathInSystem.isEmpty()) pathInSystem = configuration.getSeparator();
 
         foldersByName.put(pathInSystem, schematicFolder);
 
@@ -141,34 +144,96 @@ public class API {
             return null;
         }
 
-        return new SchematicWrapper(file.getName());
+        SchematicWrapper schematicWrapper = new SchematicWrapper(file.getName());
+        try {
+            schematicWrapper.loadThumbnail(false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return schematicWrapper;
 
     }
 
-    public static void addNewSchematic(CuboidClipboard clipboard, SchematicFolder folder, String fileName) throws IOException, DataException {
+    public static void addNewSchematic(Clipboard clipboard, SchematicFolder folder, String fileName) throws IOException {
         if (!fileName.endsWith(".schematic")) {
             fileName += ".schematic";
         }
-        SchematicFormat.MCEDIT.save(clipboard, new File(folder.getAsFile(), fileName));
+
         SchematicWrapper schematic = new SchematicWrapper(fileName);
+        schematic.setClipboard(clipboard);
         folder.addSchematic(schematic);
+
+        File schematicFile = schematic.getAsFile();
+
+        try (FileOutputStream schematicOutput = new FileOutputStream(schematicFile);) {
+            ClipboardWriter writerSchematic = ClipboardFormat.SCHEMATIC.getWriter(schematicOutput);
+            writerSchematic.write(clipboard, clipboard.getRegion().getWorld().getWorldData());
+
+            System.out.println(fileName + " saved " + schematicFile.getCanonicalPath());
+        }
+
+        generateThumbnail(schematic); // todo async
     }
 
-    public static SchematicFolder addNewFolder(String folderName) throws InvalidFolderNameException {
-        if (!Schema.isValidFolderName(folderName)) {
+    public static void generateThumbnail(SchematicWrapper schematic) throws IOException {
+        Clipboard clipboard = schematic.getClipboard();
+        File thumbnailFile = schematic.getThumbnailFile();
+        try (FileOutputStream thumbnailOutput = new FileOutputStream(thumbnailFile)) {
+
+            PNGWriter writer = new PNGWriter(thumbnailOutput);
+            BufferedImage bufferedImage = writer.write(clipboard, configuration.getThumbnailSize());
+            schematic.setThumbnail(new Thumbnail(bufferedImage));
+
+            schematic.getThumbnail().generateDescription(true);
+            schematic.getThumbnail().save(thumbnailFile);
+
+            System.out.println(schematic.getName() + " thumbnail saved " + thumbnailFile.getCanonicalPath());
+        }
+    }
+
+    public static void pasteSchematic(Clipboard clipboard, SchematicsPlayer player, @NotNull Vector toLocation) {
+        try {
+            EditSession editSession = player.getFawePlayer().getNewEditSession();
+            editSession.setBlockChangeLimit(-1);
+            editSession.setBlockChangeLimit(-1);
+
+            Transform transform = null;
+            if (player.getRotationMode() == RotationMode.RANDOM) {
+                transform = getTransform(Direction.random());
+            }
+            else if (player.getRotationMode() == RotationMode.AUTO) {
+                transform = getTransform(Direction.getDirectionByYaw(player.getPlayer().getLocation().getYaw()));
+            }
+
+            new Schematic(clipboard).paste(editSession, toLocation, true, false, transform);
+            editSession.flushQueue();
+        } catch (FaweException e) {
+            player.getPlayer().sendMessage("todo fawe /wea");
+            e.printStackTrace();
+        }
+    }
+
+    public static Transform getTransform(Direction direction) {
+        AffineTransform transform = new AffineTransform();
+        transform = transform.rotateY((90 * direction.ordinal()) % 360);
+        return transform;
+    }
+
+    public static SchematicFolder getOrCreateFolder(String folderNameWithSeparator) throws InvalidFolderNameException {
+        if (!Schema.isValidFolderName(folderNameWithSeparator, configuration.getSeparator())) {
             throw new InvalidFolderNameException();
         }
 
-        // folderName : trees.big
+        // folderNameWithSeparator : trees.big
         // addFolder trees and big
 
-        SchematicFolder folder = getFolderByName(folderName);
+        SchematicFolder folder = getFolderByName(folderNameWithSeparator);
         // If folder already exists, return
         if (folder != null) {
             return folder;
         }
 
-        String[] possibleFolderNames = configuration.getSeperatorPattern().split(folderName);
+        String[] possibleFolderNames = configuration.getSeparatorPattern().split(folderNameWithSeparator);
         SchematicFolder parent = rootSchematicFolder;
         folder = new SchematicFolder(possibleFolderNames[possibleFolderNames.length - 1]);
 
@@ -207,7 +272,7 @@ public class API {
         }
 
         // Create new folder and register schematics
-        SchematicFolder toFolder = addNewFolder(toName);
+        SchematicFolder toFolder = getOrCreateFolder(toName);
 
         // Unload currentFolder
         unloadFolderRecursive(fromFolder);

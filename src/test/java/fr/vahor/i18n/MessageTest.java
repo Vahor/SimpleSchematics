@@ -11,9 +11,9 @@ class MessageTest {
 
         Message.loadLanguage();
 
-        assertEquals("Salut", Message.PREFIX.toString());
-        assertEquals("SalutSalut", Message.PREFIX + Message.PREFIX.toString());
+        System.out.println("Message.INVENTORY_ROTATION_LORE.toString().split(\"\\n\") = " + Message.INVENTORY_ROTATION_LORE);
 
+        assertNotEquals(1, Message.INVENTORY_ROTATION_LORE.toString().split("\n").length);
         for (Message message : Message.values()) {
             assertNotNull(message.toString());
         }

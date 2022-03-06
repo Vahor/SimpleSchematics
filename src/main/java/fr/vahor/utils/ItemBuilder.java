@@ -1,15 +1,18 @@
 package fr.vahor.utils;
 
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class ItemBuilder {
 
-    private ItemStack itemStack;
-    private ItemMeta meta;
+    private final ItemStack itemStack;
+    private final ItemMeta meta;
 
     public ItemBuilder(Material material) {
         this.itemStack = new ItemStack(material);
@@ -26,8 +29,20 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder setLore(List<String> lore) {
+        meta.setLore(lore);
+        return this;
+    }
+
     public ItemBuilder setLore(String[] lore) {
         meta.setLore(Arrays.asList(lore));
+        return this;
+    }
+
+    public ItemBuilder setEnchanted(boolean bool){
+        if(!bool) return this;
+        meta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL,1, true);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         return this;
     }
 

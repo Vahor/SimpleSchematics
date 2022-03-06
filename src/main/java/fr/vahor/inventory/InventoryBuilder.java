@@ -10,8 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class InventoryBuilder {
-
+public abstract class InventoryBuilder {
 
     public static final Map<UUID, Map<Integer, Consumer<InventoryClickEvent>>> inventoryActions = new HashMap<>();
 
