@@ -1,13 +1,22 @@
 package fr.vahor.simpleschematics.schematics;
 
 import fr.vahor.simpleschematics.API;
+import lombok.Getter;
 
 public enum Direction {
 
-    NORTH,
-    SOUTH,
-    EAST,
-    WEST;
+    SOUTH(270),
+    WEST(180),
+    NORTH(90),
+    EAST(0),
+
+    ;
+
+    @Getter private final int rotation;
+
+    Direction(int rotation) {
+        this.rotation = rotation;
+    }
 
     private static final Direction[] values = values();
 
@@ -15,7 +24,7 @@ public enum Direction {
         return values[API.RANDOM.nextInt(values.length)];
     }
 
-    public static Direction getDirectionByYaw(float yaw) {
+    public static Direction getDirectionByYaw(double yaw) {
         yaw = yaw % 360;
         if (yaw < 0.0D) {
             yaw += 360.0D;
@@ -33,5 +42,9 @@ public enum Direction {
         else {
             return EAST;
         }
+    }
+
+    public static Direction getDirectionByAngle(double radian) {
+        return getDirectionByYaw(Math.toDegrees(radian));
     }
 }

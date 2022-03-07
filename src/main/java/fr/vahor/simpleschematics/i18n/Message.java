@@ -9,6 +9,10 @@ public enum Message {
     PREFIX,
 
     FOLDER_DONT_EXIST,
+
+    SCHEMATIC_DONT_EXIST,
+    SCHEMATIC_ALREADY_EXIST,
+
     EMPTY_SELECTION,
 
     TOOL_NAME,

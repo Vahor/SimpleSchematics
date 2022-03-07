@@ -14,9 +14,9 @@ public class ColorUtils {
             double distance = getDistance(r, g, b, value.color);
 
             // Don't need to check other values if this one is very close
-//            if (distance < 6_500) {
-//                return value;
-//            }
+            if (distance < 500) {
+                return value;
+            }
 
             if (distance < min) {
                 min       = distance;
@@ -24,13 +24,13 @@ public class ColorUtils {
             }
         }
 
-        if(bestMatch.chatColor == ChatColor.GOLD) {
-            System.out.println("r  = " + r);
-            System.out.println("g = " + g);
-            System.out.println("b = " + b);
-            System.out.println("bestMatch = " + bestMatch);
-            System.out.println("min = " + min);
-        }
+//        if(bestMatch.chatColor == ChatColor.GOLD) {
+//            System.out.println("r  = " + r);
+//            System.out.println("g = " + g);
+//            System.out.println("b = " + b);
+//            System.out.println("bestMatch = " + bestMatch);
+//            System.out.println("min = " + min);
+//        }
         return bestMatch;
     }
 
@@ -61,6 +61,7 @@ public class ColorUtils {
         GOLD(new Color(255, 170, 0), ChatColor.GOLD),
         _ORANGE(new Color(235, 150, 75), ChatColor.GOLD),
         _BROWN(new Color(115, 72, 37), ChatColor.GOLD),
+        _COPPER(new Color(194, 114, 66), ChatColor.GOLD),
 
         GRAY(new Color(170, 170, 170), ChatColor.GRAY),
 
@@ -74,6 +75,8 @@ public class ColorUtils {
         AQUA(new Color(85, 255, 255), ChatColor.AQUA),
 
         RED(new Color(255, 85, 85), ChatColor.RED),
+        _LIGHT_RED(new Color(208, 117, 101), ChatColor.RED),
+        _LIGHT_RED2(new Color(215, 95, 73), ChatColor.RED),
 
         LIGHT_PURPLE(new Color(255, 85, 255), ChatColor.LIGHT_PURPLE),
 

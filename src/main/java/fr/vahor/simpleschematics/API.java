@@ -3,12 +3,14 @@ package fr.vahor.simpleschematics;
 import com.boydti.fawe.object.exception.FaweException;
 import com.boydti.fawe.object.schematic.Schematic;
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
 import com.sk89q.worldedit.math.transform.AffineTransform;
-import com.sk89q.worldedit.math.transform.Transform;
+import com.sk89q.worldedit.session.SessionManager;
 import fr.vahor.simpleschematics.exceptions.FolderNotFoundException;
 import fr.vahor.simpleschematics.exceptions.InvalidFolderNameException;
 import fr.vahor.simpleschematics.fawe.PNGWriter;
@@ -165,7 +167,7 @@ public class API {
 
         File schematicFile = schematic.getAsFile();
 
-        try (FileOutputStream schematicOutput = new FileOutputStream(schematicFile);) {
+        try (FileOutputStream schematicOutput = new FileOutputStream(schematicFile)) {
             ClipboardWriter writerSchematic = ClipboardFormat.SCHEMATIC.getWriter(schematicOutput);
             writerSchematic.write(clipboard, clipboard.getRegion().getWorld().getWorldData());
 
@@ -181,11 +183,10 @@ public class API {
         try (FileOutputStream thumbnailOutput = new FileOutputStream(thumbnailFile)) {
 
             PNGWriter writer = new PNGWriter(thumbnailOutput);
-            BufferedImage bufferedImage = writer.write(clipboard, configuration.getThumbnailSize());
+            BufferedImage bufferedImage = writer.write(clipboard, Thumbnail.MAX_THUMBNAIL_SIZE);
             schematic.setThumbnail(new Thumbnail(bufferedImage));
 
-            schematic.getThumbnail().generateDescription(true);
-//            schematic.getThumbnail().save(thumbnailFile);
+            schematic.getThumbnail().generateDescription();
 
             System.out.println(schematic.getName() + " thumbnail saved " + thumbnailFile.getCanonicalPath());
         }
@@ -195,28 +196,46 @@ public class API {
         try {
             EditSession editSession = player.getFawePlayer().getNewEditSession();
             editSession.setBlockChangeLimit(-1);
-            editSession.setBlockChangeLimit(-1);
+            editSession.setFastMode(true);
 
-            Transform transform = null;
+            AffineTransform transform = null;
             if (player.getRotationMode() == RotationMode.RANDOM) {
-                transform = getTransform(Direction.random());
+                transform = new AffineTransform();
+                transform = transform.rotateY(Direction.random().getRotation());
             }
             else if (player.getRotationMode() == RotationMode.AUTO) {
-                transform = getTransform(Direction.getDirectionByYaw(player.getPlayer().getLocation().getYaw()));
+
+                // Get direction from clipboard
+                Vector origin = clipboard.getOrigin();
+                Vector center = clipboard.getRegion().getCenter();
+
+                // Direction from origin to center
+                double diffX = origin.getX() - center.getX();
+                double diffZ = origin.getZ() - center.getZ();
+                double atan2 = Math.atan2(diffX, diffZ);
+
+                Direction initialDirection = Direction.getDirectionByAngle(atan2);
+                Direction playerDirection = Direction.getDirectionByYaw(player.getPlayer().getLocation().getYaw());
+
+                System.out.println("atan2 = " + atan2);
+                System.out.println("playerDirection = " + playerDirection + " // " + playerDirection.getRotation());
+                System.out.println("initialDirection = " + initialDirection + " // " + initialDirection.getRotation());
+
+                transform = new AffineTransform();
+                transform = transform.rotateY(playerDirection.getRotation() - initialDirection.getRotation());
             }
 
             new Schematic(clipboard).paste(editSession, toLocation, true, false, transform);
             editSession.flushQueue();
+
+            // Push into history
+            SessionManager manager = WorldEdit.getInstance().getSessionManager();
+            LocalSession localSession = manager.get(player.getFawePlayer().getPlayer());
+            localSession.remember(editSession);
         } catch (FaweException e) {
             player.getPlayer().sendMessage("todo fawe /wea");
             e.printStackTrace();
         }
-    }
-
-    public static Transform getTransform(Direction direction) {
-        AffineTransform transform = new AffineTransform();
-        transform = transform.rotateY((90 * direction.ordinal()) % 360);
-        return transform;
     }
 
     public static SchematicFolder getOrCreateFolder(String folderNameWithSeparator) throws InvalidFolderNameException {

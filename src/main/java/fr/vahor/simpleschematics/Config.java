@@ -22,6 +22,7 @@ public class Config {
     }
 
     public void reload(FileConfiguration configuration) {
+        System.out.println("load Config");
         schematicsFolderPath = configuration.getString("folder");
         toolIconMaterial = configuration.getString("toolIconMaterial");
         thumbnailSize    = configuration.getInt("thumbnailSize");
