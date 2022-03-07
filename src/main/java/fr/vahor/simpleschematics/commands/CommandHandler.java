@@ -30,7 +30,6 @@ public class CommandHandler implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
-
         if (!(sender instanceof Player)) {
             return false;
         }
@@ -41,15 +40,6 @@ public class CommandHandler implements CommandExecutor {
         }
 
         SchematicsPlayer schematicsPlayer = API.getOrAddPlayer(player.getUniqueId());
-
-        for (ASchematic child : API.getRootSchematicFolder().getChildren()) {
-            try {
-                ((SchematicWrapper) child).loadSchematic(schematicsPlayer.getFawePlayer().getWorld().getWorldData(), false);
-                API.generateThumbnail((SchematicWrapper) child);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
         if (args.length == 0) {
             // Default command, gives tool
@@ -145,6 +135,7 @@ public class CommandHandler implements CommandExecutor {
                         }
                         else if (commandName.equalsIgnoreCase("thumbnail") || commandName.equalsIgnoreCase("t")) {
                             generateThumbnailForFolder(schematicsPlayer, folderNameWithSeparator);
+                            return true;
                         }
 
                     }
@@ -216,6 +207,11 @@ public class CommandHandler implements CommandExecutor {
 
     private void generateThumbnailForFolder(SchematicsPlayer player, String folderNameWithSeparator) {
         SchematicFolder folder = API.getFolderByName(folderNameWithSeparator);
+        if (folder == null) {
+            player.getPlayer().sendMessage(Message.PREFIX + Message.FOLDER_DONT_EXIST.toString());
+            return;
+        }
+
         for (ASchematic child : folder.getChildren()) {
             try {
                 if (child instanceof SchematicWrapper) {
@@ -226,6 +222,7 @@ public class CommandHandler implements CommandExecutor {
                 e.printStackTrace();
             }
         }
+        player.getPlayer().sendMessage(Message.PREFIX + "todo generateThumbnailForFolder");
     }
 
     private void createSchematic(SchematicsPlayer player, String folderNameWithSeparator, String schematicName) throws InvalidFolderNameException, IOException {
@@ -234,6 +231,15 @@ public class CommandHandler implements CommandExecutor {
             return;
         }
         // todo tester si le schematic existe déjà, si c'est le cas, on fait une erreur lui disant de supprimer ou déplacer l'ancien
+
+        SchematicFolder folderByName = API.getFolderByName(folderNameWithSeparator);
+        if (folderByName != null) {
+            if (folderByName.hasChildrenWithName(schematicName)) {
+                player.getPlayer().sendMessage(Message.PREFIX + Message.SCHEMATIC_ALREADY_EXIST.toString());
+                return;
+            }
+        }
+
         CuboidRegion region = new CuboidRegion(player.getFawePlayer().getWorld(), player.getPos()[0], player.getPos()[1]);
         try {
             BlockArrayClipboard clipboard = new BlockArrayClipboard(region, player.getUuid());

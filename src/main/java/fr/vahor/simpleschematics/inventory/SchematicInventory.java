@@ -133,7 +133,6 @@ public class SchematicInventory extends InventoryBuilder {
     }
 
     public void addRandomRotationButton() {
-        System.out.println("Message.INVENTORY_ROTATION_LORE.to String() = " + Message.INVENTORY_ROTATION_LORE.toString());
         setItem(47,
                 new ItemBuilder(Material.COOKED_BEEF)
                         .setName(Message.INVENTORY_ROTATION_NAME.toString())
@@ -150,12 +149,10 @@ public class SchematicInventory extends InventoryBuilder {
     }
 
     private void addGlass() {
-        ItemStack glass = new ItemBuilder(Material.valueOf("STAINED_GLASS_PANE")).setName(" ").build();
+        ItemStack glass = new ItemBuilder(Material.STAINED_GLASS_PANE).setName(" ").build();
         for (int column = 0; column < 9; column++) {
             setItem(36 + column, glass,
-                    (event) -> {
-                        event.setCancelled(true);
-                    });
+                    (event) -> event.setCancelled(true));
         }
     }
 
@@ -165,7 +162,7 @@ public class SchematicInventory extends InventoryBuilder {
         Thumbnail thumbnail = schematic.getThumbnail();
         if(thumbnail != null ) {
             if (thumbnail.getCachedList() == null) {
-                thumbnail.generateDescription(false);
+                thumbnail.generateDescription();
             }
             lore.addAll(thumbnail.getCachedList()); // todo async with callback
         }

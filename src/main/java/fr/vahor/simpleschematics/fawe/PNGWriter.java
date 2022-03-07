@@ -104,7 +104,10 @@ public class PNGWriter implements AutoCloseable {
                         mutableTop.mutY(y + 1);
                         mutableRight.mutY(y);
                         mutableLeft.mutY(y);
-                        if (clipboard.getBlock(mutableTop).getId() == 0 || clipboard.getBlock(mutableRight) == EditSession.nullBlock || clipboard.getBlock(mutableLeft).getId() == 0) {
+                        if (clipboard.getBlock(mutableTop).getId() == 0
+                                || clipboard.getBlock(mutableRight) == EditSession.nullBlock ||
+                                clipboard.getBlock(mutableLeft).getId() == 0
+                        ) {
                             double cpy = cpy2 - dpxi[y - y0];
 
                             poly1X[0] = (int) cpx;
