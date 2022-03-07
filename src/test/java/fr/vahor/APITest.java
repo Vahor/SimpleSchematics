@@ -1,7 +1,7 @@
 package fr.vahor;
 
-import fr.vahor.exceptions.FolderNotFoundException;
-import fr.vahor.exceptions.InvalidFolderNameException;
+import fr.vahor.simpleschematics.exceptions.FolderNotFoundException;
+import fr.vahor.simpleschematics.exceptions.InvalidFolderNameException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

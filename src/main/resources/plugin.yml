@@ -1,5 +1,5 @@
 name: SimpleSchematics
-main: fr.vahor.SimpleSchematics
+main: fr.vahor.simpleschematics.SimpleSchematics
 version: '${version}'
 author: Vahor
 description: SimpleSchematics
