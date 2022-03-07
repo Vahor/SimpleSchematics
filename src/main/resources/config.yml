@@ -1,0 +1,4 @@
+folder: 'plugins/SimpleSchematics/schematics'
+toolIconMaterial: 'INK_SACK'
+separator: '.'
+thumbnailSize: 20

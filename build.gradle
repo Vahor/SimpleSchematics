@@ -1,25 +1,48 @@
-//file:noinspection SpellCheckingInspection
 plugins {
     id 'java'
     id 'java-library'
 
     id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "io.freefair.lombok" version "6.4.1"
 
     id 'idea'
 }
 
 repositories {
     mavenCentral()
+    mavenLocal()
 
-    maven { url "https://papermc.io/repo/repository/maven-public/" }
+    maven {
+        name 'Paper'
+        url "https://repo.destroystokyo.com/repository/maven-public/"
+    }
+
+
+    maven {
+        name 'WorldEdit'
+        url 'https://maven.sk89q.com/repo/'
+    }
+
+    flatDir {
+        dirs 'libs'
+    }
 }
 
 dependencies {
-    compileOnly "io.papermc.paper:paper-api:1.18.1-R0.1-SNAPSHOT"
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'com.sk89q.worldedit:worldedit-core:6.1'
 
+    compileOnly name: "spigot-1.8"
+    compileOnly "io.papermc.paper:paper-api:1.18-R0.1-SNAPSHOT"
+    compileOnly name: "fawe-1.8"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testImplementation 'org.mockito:mockito-core:4.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+
+    testRuntimeOnly "io.papermc.paper:paper-api:1.18-R0.1-SNAPSHOT"
+    testRuntimeOnly name: "fawe-1.8"
+    testRuntimeOnly name: "spigot-1.8"
 }
 
 
@@ -33,6 +56,7 @@ configurations.all {
 
 tasks.compileJava.configure {
     options.release.set(8)
+    options.encoding = 'UTF-8'
 }
 
 test {
@@ -42,13 +66,13 @@ test {
 processResources {
     def versionFile = file('version.properties')
 
-    def Properties versionProps = new Properties()
+    Properties versionProps = new Properties()
 
     versionProps.load(new FileInputStream(versionFile))
-    def major = versionProps['major'].toInteger()
-    def minor = versionProps['minor'].toInteger()
-    def patch = versionProps['patch'].toInteger() + 1
-    versionProps['patch'] = minor.toString()
+    def major = versionProps.getAt('major').toInteger()
+    def minor = versionProps.getAt('minor').toInteger()
+    def patch = versionProps.getAt('patch').toInteger()// + 1
+    versionProps.putAt('patch', patch.toString())
     versionProps.store(versionFile.newWriter(), null)
 
     project.version = major + "." + minor + "." + patch
