@@ -40,21 +40,19 @@ public class PlayerInteractListener implements Listener {
         boolean isLeftClick = !isRightClick && (event.getAction().equals(Action.LEFT_CLICK_AIR) || event.getAction().equals(Action.LEFT_CLICK_BLOCK));
 
         if (schematicsPlayer.isInSelectionMode()) {
-            if (isLeftClick) {
-                Location location = event.getClickedBlock().getLocation();
-                Vector blockVector = new Vector(location.getX(), location.getY(), location.getZ());
-                schematicsPlayer.setPosition(
-                        schematicsPlayer.getNextPositionIndex(),
-                        blockVector,
-                        true);
-            }
+            Location location = event.getClickedBlock().getLocation();
+            Vector blockVector = new Vector(location.getX(), location.getY(), location.getZ());
+            schematicsPlayer.setPosition(
+                    schematicsPlayer.getNextPositionIndex(),
+                    blockVector,
+                    true);
         }
         else {
-            if (isRightClick) {
+            if (isLeftClick) {
                 player.openInventory(new SchematicInventory(player).getInventory());
             }
 
-            else if (isLeftClick) {
+            else if (isRightClick) {
                 SchematicWrapper schematic = schematicsPlayer.getRandomSchematic();
                 if (schematic == null) { // empty list
                     return;

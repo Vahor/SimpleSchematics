@@ -8,6 +8,6 @@ class ColorUtilsTest {
 
     @Test
     void getClosestColor() {
-        assertEquals(ColorUtils.ColorData.DARK_RED, ColorUtils.getClosestColor(255,0,0));
+        assertEquals(ColorUtils.ColorData.RED, ColorUtils.getClosestColor(255,0,0));
     }
 }

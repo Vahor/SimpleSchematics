@@ -24,10 +24,10 @@ public class ColorUtils {
             }
         }
 
-//        if(bestMatch.chatColor == ChatColor.GOLD) {
+//        if(bestMatch.chatColor == ChatColor.GRAY) {
 //            System.out.println("r  = " + r);
 //            System.out.println("g = " + g);
-//            System.out.println("b = " + b);
+//            System.out.println("b  = " + b);
 //            System.out.println("bestMatch = " + bestMatch);
 //            System.out.println("min = " + min);
 //        }
@@ -57,30 +57,38 @@ public class ColorUtils {
         _CHESTNUT(new Color(162, 67, 52), ChatColor.DARK_RED),
 
         DARK_PURPLE(new Color(170, 0, 170), ChatColor.DARK_PURPLE),
+        _METALLIC_VIOLET(new Color(84, 0, 140), ChatColor.DARK_PURPLE),
 
         GOLD(new Color(255, 170, 0), ChatColor.GOLD),
         _ORANGE(new Color(235, 150, 75), ChatColor.GOLD),
         _BROWN(new Color(115, 72, 37), ChatColor.GOLD),
         _COPPER(new Color(194, 114, 66), ChatColor.GOLD),
+        _DARK_ORANGE(new Color(178, 70, 0), ChatColor.GOLD),
 
         GRAY(new Color(170, 170, 170), ChatColor.GRAY),
 
         DARK_GRAY(new Color(85, 85, 85), ChatColor.DARK_GRAY),
 
-        BLUE(new Color(85, 85, 255), ChatColor.BLUE),
+        BLUE(new Color(0, 0, 255), ChatColor.BLUE),
+        _BLUE(new Color(85, 85, 255), ChatColor.BLUE),
+        _CHINESE_BLUE(new Color(60, 92, 156), ChatColor.BLUE),
 
-        GREEN(new Color(85, 255, 85), ChatColor.GREEN),
+        GREEN(new Color(0, 255, 0), ChatColor.GREEN),
+        _GREEN(new Color(85, 255, 85), ChatColor.GREEN),
         _MOSS(new Color(121, 132, 64), ChatColor.GREEN),
 
         AQUA(new Color(85, 255, 255), ChatColor.AQUA),
+        _DARKER_AQUA(new Color(135, 194, 234), ChatColor.AQUA),
 
-        RED(new Color(255, 85, 85), ChatColor.RED),
+        RED(new Color(255, 0, 0), ChatColor.RED),
+        _RED(new Color(255, 85, 85), ChatColor.RED),
         _LIGHT_RED(new Color(208, 117, 101), ChatColor.RED),
         _LIGHT_RED2(new Color(215, 95, 73), ChatColor.RED),
 
         LIGHT_PURPLE(new Color(255, 85, 255), ChatColor.LIGHT_PURPLE),
 
-        YELLOW(new Color(255, 255, 85), ChatColor.YELLOW),
+        YELLOW(new Color(255, 255, 0), ChatColor.YELLOW),
+        _YELLOW(new Color(255, 255, 85), ChatColor.YELLOW),
 
         WHITE(new Color(255, 255, 255), ChatColor.WHITE),
         ;
