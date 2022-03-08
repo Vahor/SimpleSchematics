@@ -39,6 +39,11 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder addItemFlags(ItemFlag... flags) {
+        meta.addItemFlags(flags);
+        return this;
+    }
+
     public ItemBuilder setEnchanted(boolean bool){
         if(!bool) return this;
         meta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL,1, true);

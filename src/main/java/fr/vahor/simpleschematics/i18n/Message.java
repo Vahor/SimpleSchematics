@@ -2,6 +2,10 @@ package fr.vahor.simpleschematics.i18n;
 
 import fr.vahor.simpleschematics.utils.EncodingResourceBundleControl;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URLClassLoader;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public enum Message {
@@ -43,9 +47,14 @@ public enum Message {
     private static ResourceBundle bundle;
     private static final EncodingResourceBundleControl utf8Control = new EncodingResourceBundleControl("UTF-8");
 
-    public static void loadLanguage() {
-        ResourceBundle.clearCache();
-        bundle = ResourceBundle.getBundle("messages", utf8Control);
+    public static void loadLanguage(File dataFolder) {
+        try {
+            ResourceBundle.clearCache();
+            ClassLoader loader = new URLClassLoader(new java.net.URL[]{dataFolder.toURI().toURL()});
+            bundle = ResourceBundle.getBundle("messages", Locale.getDefault(), loader, utf8Control);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

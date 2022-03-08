@@ -167,7 +167,7 @@ public class SchematicInventory extends InventoryBuilder {
             lore.addAll(thumbnail.getCachedList()); // todo async with callback
         }
         setItem(slot,
-                new ItemBuilder(Material.PAPER)
+                new ItemBuilder(enabled ? Material.MAP : Material.PAPER)
                         .setEnchanted(enabled)
                         .setName(Message.INVENTORY_SCHEMATIC_NAME.toString().replace("{name}", schematic.getName()))
                         .setLore(lore)
