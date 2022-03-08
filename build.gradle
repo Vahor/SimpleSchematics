@@ -71,9 +71,7 @@ processResources {
     versionProps.load(new FileInputStream(versionFile))
     def major = versionProps.getAt('major').toInteger()
     def minor = versionProps.getAt('minor').toInteger()
-    def patch = versionProps.getAt('patch').toInteger()// + 1
-    versionProps.putAt('patch', patch.toString())
-    versionProps.store(versionFile.newWriter(), null)
+    def patch = versionProps.getAt('patch').toInteger()
 
     project.version = major + "." + minor + "." + patch
     expand(project.properties)

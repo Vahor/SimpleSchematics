@@ -186,8 +186,6 @@ public class API {
             BufferedImage bufferedImage = writer.write(clipboard, Thumbnail.MAX_THUMBNAIL_SIZE);
             schematic.setThumbnail(new Thumbnail(bufferedImage));
 
-            schematic.getThumbnail().generateDescription();
-
             System.out.println(schematic.getName() + " thumbnail saved " + thumbnailFile.getCanonicalPath());
         }
     }
@@ -216,10 +214,6 @@ public class API {
 
                 Direction initialDirection = Direction.getDirectionByAngle(atan2);
                 Direction playerDirection = Direction.getDirectionByYaw(player.getPlayer().getLocation().getYaw());
-
-                System.out.println("atan2 = " + atan2);
-                System.out.println("playerDirection = " + playerDirection + " // " + playerDirection.getRotation());
-                System.out.println("initialDirection = " + initialDirection + " // " + initialDirection.getRotation());
 
                 transform = new AffineTransform();
                 transform = transform.rotateY(playerDirection.getRotation() - initialDirection.getRotation());

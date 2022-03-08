@@ -158,11 +158,14 @@ public class SchematicInventory extends InventoryBuilder {
 
     public void addSchematicIcon(final SchematicWrapper schematic, final int slot) {
         boolean enabled = schematicsPlayer.isSchematicEnabled(schematic);
-        List<String> lore = new ArrayList<>(Arrays.asList(Message.INVENTORY_SCHEMATIC_LORE.toString().split("\n")));
+        List<String> lore = new ArrayList<>(Arrays.asList(
+                Message.INVENTORY_SCHEMATIC_LORE.toString().split("\n")));
         Thumbnail thumbnail = schematic.getThumbnail();
-        if(thumbnail != null ) {
-            if (thumbnail.getCachedList() == null) {
-                thumbnail.generateDescription();
+        if (thumbnail != null) {
+            try {
+                schematic.loadThumbnail(false);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
             lore.addAll(thumbnail.getCachedList()); // todo async with callback
         }

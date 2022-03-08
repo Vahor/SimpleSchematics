@@ -24,13 +24,6 @@ public class ColorUtils {
             }
         }
 
-//        if(bestMatch.chatColor == ChatColor.GRAY) {
-//            System.out.println("r  = " + r);
-//            System.out.println("g = " + g);
-//            System.out.println("b  = " + b);
-//            System.out.println("bestMatch = " + bestMatch);
-//            System.out.println("min = " + min);
-//        }
         return bestMatch;
     }
 
@@ -52,22 +45,26 @@ public class ColorUtils {
 
         DARK_AQUA(new Color(0, 170, 170), ChatColor.DARK_AQUA),
 
+        GOLD(new Color(255, 170, 0), ChatColor.GOLD),
+        _ORANGE(new Color(235, 150, 75), ChatColor.GOLD),
+        _BROWN(new Color(135, 79, 34), ChatColor.GOLD),
+        _COPPER(new Color(194, 114, 66), ChatColor.GOLD),
+        _DARK_ORANGE(new Color(155, 70, 0), ChatColor.GOLD),
+        _COCONUT(new Color(160, 95, 55), ChatColor.GOLD),
+        _JASPER_ORANGE(new Color(235, 147, 75), ChatColor.GOLD),
+
         DARK_RED(new Color(170, 0, 0), ChatColor.DARK_RED),
-        _BLOOD(new Color(106, 46, 37), ChatColor.DARK_RED),
         _CHESTNUT(new Color(162, 67, 52), ChatColor.DARK_RED),
+        _REDWOOD(new Color(166, 95, 83), ChatColor.DARK_RED),
+        _BLOOD(new Color(120, 45, 35), ChatColor.DARK_RED),
 
         DARK_PURPLE(new Color(170, 0, 170), ChatColor.DARK_PURPLE),
         _METALLIC_VIOLET(new Color(84, 0, 140), ChatColor.DARK_PURPLE),
 
-        GOLD(new Color(255, 170, 0), ChatColor.GOLD),
-        _ORANGE(new Color(235, 150, 75), ChatColor.GOLD),
-        _BROWN(new Color(115, 72, 37), ChatColor.GOLD),
-        _COPPER(new Color(194, 114, 66), ChatColor.GOLD),
-        _DARK_ORANGE(new Color(178, 70, 0), ChatColor.GOLD),
-
         GRAY(new Color(170, 170, 170), ChatColor.GRAY),
 
         DARK_GRAY(new Color(85, 85, 85), ChatColor.DARK_GRAY),
+        _ROSE_EBONY(new Color(98, 67, 62), ChatColor.DARK_GRAY),
 
         BLUE(new Color(0, 0, 255), ChatColor.BLUE),
         _BLUE(new Color(85, 85, 255), ChatColor.BLUE),
@@ -76,6 +73,7 @@ public class ColorUtils {
         GREEN(new Color(0, 255, 0), ChatColor.GREEN),
         _GREEN(new Color(85, 255, 85), ChatColor.GREEN),
         _MOSS(new Color(121, 132, 64), ChatColor.GREEN),
+        _DARK_LEMON_LIME(new Color(108, 214, 34), ChatColor.GREEN),
 
         AQUA(new Color(85, 255, 255), ChatColor.AQUA),
         _DARKER_AQUA(new Color(135, 194, 234), ChatColor.AQUA),
