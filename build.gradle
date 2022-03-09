@@ -33,14 +33,12 @@ dependencies {
     implementation 'com.sk89q.worldedit:worldedit-core:6.1'
 
     compileOnly name: "spigot-1.8"
-    compileOnly "io.papermc.paper:paper-api:1.18-R0.1-SNAPSHOT"
     compileOnly name: "fawe-1.8"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testImplementation 'org.mockito:mockito-core:4.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
-    testRuntimeOnly "io.papermc.paper:paper-api:1.18-R0.1-SNAPSHOT"
     testRuntimeOnly name: "fawe-1.8"
     testRuntimeOnly name: "spigot-1.8"
 }

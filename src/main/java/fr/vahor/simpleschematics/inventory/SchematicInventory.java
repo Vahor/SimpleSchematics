@@ -43,7 +43,7 @@ public class SchematicInventory extends InventoryBuilder {
         // Clear area
         for (int row = 0; row < 4; row++) {
             for (int column = 0; column < 9; column++) {
-                inventory.setItem(row * 9 + column, null);
+                setItem(row * 9 + column, null, null);
             }
         }
 
@@ -134,7 +134,7 @@ public class SchematicInventory extends InventoryBuilder {
 
     public void addRandomRotationButton() {
         setItem(47,
-                new ItemBuilder(Material.COOKED_BEEF)
+                new ItemBuilder(Material.COMPASS)
                         .setName(Message.INVENTORY_ROTATION_NAME.toString())
                         .setLore(Message.INVENTORY_ROTATION_LORE.toString()
                                 .replace("{current}", schematicsPlayer.getRotationMode().name())
@@ -162,13 +162,17 @@ public class SchematicInventory extends InventoryBuilder {
                 Message.INVENTORY_SCHEMATIC_LORE.toString().split("\n")));
         Thumbnail thumbnail = schematic.getThumbnail();
         if (thumbnail != null) {
-            try {
-                schematic.loadThumbnail(false);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            lore.addAll(thumbnail.getCachedList()); // todo async with callback
+            lore.addAll(thumbnail.getCachedList());
         }
+        else {
+            final SchematicFolder folderWhenStarted = currentFolder;
+            schematic.loadThumbnail(false).thenRun(() -> {
+                if (currentFolder == folderWhenStarted) // If still in the same folder
+                    addSchematicIcon(schematic, slot);
+            });
+            lore.add("todo loading"); // todo loading lore
+        }
+
         setItem(slot,
                 new ItemBuilder(enabled ? Material.MAP : Material.PAPER)
                         .setEnchanted(enabled)

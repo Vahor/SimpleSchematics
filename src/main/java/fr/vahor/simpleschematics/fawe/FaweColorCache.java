@@ -1,5 +1,7 @@
 package fr.vahor.simpleschematics.fawe;
 
+import fr.vahor.simpleschematics.utils.ColorUtils;
+
 import java.awt.*;
 
 import static com.boydti.fawe.FaweCache.CACHE_COLOR;
@@ -19,5 +21,9 @@ public class FaweColorCache {
         CACHE_COLOR[getCombined(126, 12)] = new Color(194, 115, 67); // Acacia Wood Slab DOWN
 
         CACHE_COLOR[getCombined(100, 15)] = new Color(255, 255, 255); // White Mushroom Block
+
+
+        CACHE_COLOR[getCombined(162, 13)] = ColorUtils.ColorData._BROWN.getColor(); // FullBlock Dark Oak Wod
+
     }
 }

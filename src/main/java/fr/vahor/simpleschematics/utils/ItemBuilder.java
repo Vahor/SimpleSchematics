@@ -47,7 +47,7 @@ public class ItemBuilder {
     public ItemBuilder setEnchanted(boolean bool){
         if(!bool) return this;
         meta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL,1, true);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+//        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         return this;
     }
 

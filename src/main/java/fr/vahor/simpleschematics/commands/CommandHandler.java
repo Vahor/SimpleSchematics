@@ -10,6 +10,7 @@ import fr.vahor.simpleschematics.API;
 import fr.vahor.simpleschematics.SimpleSchematics;
 import fr.vahor.simpleschematics.exceptions.FolderNotFoundException;
 import fr.vahor.simpleschematics.exceptions.InvalidFolderNameException;
+import fr.vahor.simpleschematics.exceptions.InvalidSchematicNameException;
 import fr.vahor.simpleschematics.i18n.Message;
 import fr.vahor.simpleschematics.permissions.Permissions;
 import fr.vahor.simpleschematics.schematics.SchematicsPlayer;
@@ -20,7 +21,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -28,7 +28,7 @@ import java.util.Arrays;
 public class CommandHandler implements CommandExecutor {
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
         if (!(sender instanceof Player)) {
             return false;
@@ -186,7 +186,10 @@ public class CommandHandler implements CommandExecutor {
 
                 player.sendMessage("help level 1");
 
-            } catch (InvalidFolderNameException e) {
+            } catch (InvalidSchematicNameException e) {
+                player.sendMessage("todo Nom de schematic invalide");
+                e.printStackTrace();
+            }  catch (InvalidFolderNameException e) {
                 player.sendMessage("todo Nom de dossier invalide");
                 e.printStackTrace();
             } catch (FolderNotFoundException e) {
@@ -225,7 +228,7 @@ public class CommandHandler implements CommandExecutor {
         player.getPlayer().sendMessage(Message.PREFIX + "todo generateThumbnailForFolder");
     }
 
-    private void createSchematic(SchematicsPlayer player, String folderNameWithSeparator, String schematicName) throws InvalidFolderNameException, IOException {
+    private void createSchematic(SchematicsPlayer player, String folderNameWithSeparator, String schematicName) throws InvalidFolderNameException, IOException, InvalidSchematicNameException {
         if (player.isSelectionInvalid()) {
             player.getPlayer().sendMessage(Message.PREFIX + Message.EMPTY_SELECTION.toString());
             return;

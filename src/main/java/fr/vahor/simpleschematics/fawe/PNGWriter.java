@@ -40,17 +40,20 @@ public class PNGWriter implements AutoCloseable {
         int width = region.getWidth();
         int height = region.getHeight();
         int length = region.getLength();
+
         BufferedImage img = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = img.createGraphics();
         double d = Math.min((double) imageSize / (double) length, (double) imageSize / (double) width) / 3.0D;
         double d_2 = d / 2.0D;
         double cx = (double) imageSize / 2.0D;
+
         int[] poly1X = new int[4];
         int[] poly1Y = new int[4];
         int[] poly2X = new int[4];
         int[] poly2Y = new int[4];
         int[] poly3X = new int[4];
         int[] poly3Y = new int[4];
+
         double[] dpxj = new double[length];
         double[] dpxi = new double[Math.max(256, width)];
         double[] dpyj = new double[length];
@@ -59,7 +62,7 @@ public class PNGWriter implements AutoCloseable {
         int i;
         for (i = 0; i < dpxj.length; ++i) {
             dpxj[i] = cx + (double) i * d;
-            dpyj[i] = (double) (imageSize / 2) + d + (double) i * d_2;
+            dpyj[i] = imageSize / 1.5d + d + (double) i * d_2;
         }
 
         for (i = 0; i < dpxi.length; ++i) {

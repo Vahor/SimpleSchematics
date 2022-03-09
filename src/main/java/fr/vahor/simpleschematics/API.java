@@ -13,6 +13,7 @@ import com.sk89q.worldedit.math.transform.AffineTransform;
 import com.sk89q.worldedit.session.SessionManager;
 import fr.vahor.simpleschematics.exceptions.FolderNotFoundException;
 import fr.vahor.simpleschematics.exceptions.InvalidFolderNameException;
+import fr.vahor.simpleschematics.exceptions.InvalidSchematicNameException;
 import fr.vahor.simpleschematics.fawe.PNGWriter;
 import fr.vahor.simpleschematics.schematics.Direction;
 import fr.vahor.simpleschematics.schematics.RotationMode;
@@ -26,7 +27,6 @@ import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.jetbrains.annotations.NotNull;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -34,6 +34,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class API {
 
@@ -63,6 +64,10 @@ public class API {
 
     public static Collection<SchematicsPlayer> getPlayers() {
         return playerMap.values();
+    }
+
+    public static List<String> getFoldersNames() {
+        return foldersByName.values().stream().map(ASchematic::getPath).collect(Collectors.toList());
     }
 
     public static void init() {
@@ -130,11 +135,12 @@ public class API {
 
         // Using file path as recursion is not finished here
         String pathInSystem = directory.getPath()
-                .replaceFirst(configuration.getSchematicsFolderPath(), "")
-                .replace(SYSTEM_SEPARATOR, configuration.getSeparator())
-                .replaceFirst(configuration.getSeparator(), "");
+                .replace(SYSTEM_SEPARATOR, "/") // System compatibility => Mac separator is / ; and Windows is \
+                .replaceFirst(configuration.getSchematicsFolderPath(), "") // Don't need to prefix with plugin/../Schematics
+                .replace("/", configuration.getSeparator()); // Replaces all '/' by custom separator
 
         if (pathInSystem.isEmpty()) pathInSystem = configuration.getSeparator();
+        else if(pathInSystem.startsWith(configuration.getSeparator())) pathInSystem = pathInSystem.substring(configuration.getSeparator().length()); // Remove first seperator
 
         foldersByName.put(pathInSystem, schematicFolder);
 
@@ -146,24 +152,22 @@ public class API {
             return null;
         }
 
-        SchematicWrapper schematicWrapper = new SchematicWrapper(file.getName());
-        try {
-            schematicWrapper.loadThumbnail(false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return schematicWrapper;
+        return new SchematicWrapper(file.getName().substring(0, file.getName().lastIndexOf(".schematic")));
 
     }
 
-    public static void addNewSchematic(Clipboard clipboard, SchematicFolder folder, String fileName) throws IOException {
-        if (!fileName.endsWith(".schematic")) {
-            fileName += ".schematic";
+    public static void addNewSchematic(Clipboard clipboard, SchematicFolder folder, String fileName) throws IOException, InvalidSchematicNameException {
+        if (!Schema.isValidFolderName(fileName, configuration.getSeparator())) {
+            throw new InvalidSchematicNameException();
         }
 
         SchematicWrapper schematic = new SchematicWrapper(fileName);
         schematic.setClipboard(clipboard);
         folder.addSchematic(schematic);
+
+        if (!fileName.endsWith(".schematic")) {
+            fileName += ".schematic";
+        }
 
         File schematicFile = schematic.getAsFile();
 
@@ -190,7 +194,7 @@ public class API {
         }
     }
 
-    public static void pasteSchematic(Clipboard clipboard, SchematicsPlayer player, @NotNull Vector toLocation) {
+    public static void pasteSchematic(Clipboard clipboard, SchematicsPlayer player, Vector toLocation) {
         try {
             EditSession editSession = player.getFawePlayer().getNewEditSession();
             editSession.setBlockChangeLimit(-1);
@@ -241,6 +245,7 @@ public class API {
         // addFolder trees and big
 
         SchematicFolder folder = getFolderByName(folderNameWithSeparator);
+        System.out.println("foldersByName = " + foldersByName);
         // If folder already exists, return
         if (folder != null) {
             return folder;
@@ -249,19 +254,33 @@ public class API {
         String[] possibleFolderNames = configuration.getSeparatorPattern().split(folderNameWithSeparator);
         SchematicFolder parent = rootSchematicFolder;
         folder = new SchematicFolder(possibleFolderNames[possibleFolderNames.length - 1]);
+        StringBuilder parents = new StringBuilder();
+        System.out.println("possibleFolderNames = " + Arrays.toString(possibleFolderNames));
+        System.out.println("parents = " + parents);
 
         for (int i = 0; i < possibleFolderNames.length - 1; i++) {
-            SchematicFolder possibleParent = getFolderByName(possibleFolderNames[i]);
+            String possibleFolderName = possibleFolderNames[i];
+            // Add parents prefix:
+            // ex: possibleFolderName => big
+            // But we need to check for trees.big ( trees. is parents prefix )
+            SchematicFolder possibleParent = getFolderByName(parents + possibleFolderName);
+            System.out.println("parents = " + parents);
 
             if (possibleParent == null) {
                 // Register parent folder
-                possibleParent = new SchematicFolder(possibleFolderNames[i]);
+                possibleParent = new SchematicFolder(possibleFolderName);
                 parent.addSchematic(possibleParent);
+                System.out.println("API.getOrCreateFolder");
+                System.out.println("parent = " + parent);
+                System.out.println("possibleParent = " + possibleParent);
 
                 foldersByName.put(possibleParent.getPath(), possibleParent);
             }
 
             parent = possibleParent;
+
+            parents.append(possibleFolderName);
+            parents.append(configuration.getSeparator());
         }
 
         parent.addSchematic(folder);
@@ -306,7 +325,7 @@ public class API {
         FileUtils.deleteDirectory(folder.getAsFile());
     }
 
-    private static void unloadFolderRecursive(@NotNull SchematicFolder folder) {
+    private static void unloadFolderRecursive(SchematicFolder folder) {
 
         // Delete every child
         for (ASchematic child : folder.getChildren()) {
@@ -317,7 +336,7 @@ public class API {
         unloadFolder(folder);
     }
 
-    private static void unloadFolder(@NotNull SchematicFolder folder) {
+    private static void unloadFolder(SchematicFolder folder) {
         foldersByName.remove(folder.getPath());
     }
 }
