@@ -110,7 +110,6 @@ public class CommandHandler implements CommandExecutor {
             // /s folder|f
             // /s schematics|s
 
-            System.out.println("args = " + Arrays.toString(args) + " // " + args.length);
             try {
                 String commandName = args[1];
 

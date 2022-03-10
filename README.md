@@ -6,4 +6,4 @@
  - Auto import/remove schematics when file is imported
  - Add inventory to show currently selected schematics
  - TabComplete with lowercase support
- - Crop Thumbnail in x direction
+ - /s posX => Item does posX+1
