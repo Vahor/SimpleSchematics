@@ -40,7 +40,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class CommandHandler implements CommandExecutor {
 
@@ -82,14 +81,17 @@ public class CommandHandler implements CommandExecutor {
             // pos1 2 3
             if (args[0].equalsIgnoreCase("pos1")) {
                 schematicsPlayer.setPosition(0, schematicsPlayer.getCurrentPosition(), true);
+                schematicsPlayer.setPosIndex(1);
                 return true;
             }
             if (args[0].equalsIgnoreCase("pos2")) {
                 schematicsPlayer.setPosition(1, schematicsPlayer.getCurrentPosition(), true);
+                schematicsPlayer.setPosIndex(2);
                 return true;
             }
             if (args[0].equalsIgnoreCase("pos3")) {
                 schematicsPlayer.setPosition(2, schematicsPlayer.getCurrentPosition(), true);
+                schematicsPlayer.setPosIndex(0);
                 return true;
             }
 
@@ -205,7 +207,7 @@ public class CommandHandler implements CommandExecutor {
             } catch (InvalidSchematicNameException e) {
                 player.sendMessage("todo Nom de schematic invalide");
                 e.printStackTrace();
-            }  catch (InvalidFolderNameException e) {
+            } catch (InvalidFolderNameException e) {
                 player.sendMessage("todo Nom de dossier invalide");
                 e.printStackTrace();
             } catch (FolderNotFoundException e) {

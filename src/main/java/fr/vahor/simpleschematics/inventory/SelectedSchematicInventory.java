@@ -95,7 +95,7 @@ public class SelectedSchematicInventory extends InventoryBuilder {
     public void addSchematicIcon(final SchematicWrapper schematic, final int slot) {
         List<String> lore = new ArrayList<>(Arrays.asList(
                 Message.INVENTORY_SCHEMATIC_LORE.toString()
-                        .replace("{path}", schematic.getPath())
+                        .replace("{path}", schematic.getParent().getPath())
                         .split("\n")));
         Thumbnail thumbnail = schematic.getThumbnail();
         if (thumbnail != null) {

@@ -137,8 +137,10 @@ public class SchematicsPlayer {
         }
     }
 
+    public void setPosIndex(int posIndex) {
+        this.posIndex = posIndex;
+    }
     public int getNextPositionIndex() {
-        System.out.println("posIndex  = " + posIndex);
         int current = posIndex;
         posIndex = (posIndex + 1) % 3;
         return current;
