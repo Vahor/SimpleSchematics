@@ -8,3 +8,4 @@
  - /s posX => Item does posX+1
  - Add Pagination
  - Add an abstract class for common methods of SchematicInventory and SelectedSchematicInventory
+ - Add javadoc

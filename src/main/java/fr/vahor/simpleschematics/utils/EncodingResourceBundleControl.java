@@ -1,3 +1,20 @@
+/*
+ *     Copyright (C) 2022 Nathan David
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package fr.vahor.simpleschematics.utils;
 
 import java.io.IOException;
@@ -13,14 +30,14 @@ import java.util.ResourceBundle.Control;
 // https://github.com/hagrawal7/CustomResourceBundleControl
 public class EncodingResourceBundleControl extends Control {
 
-    private String encodingScheme = "UTF-8";
+    private final String encodingScheme;
 
     public EncodingResourceBundleControl(String encodingSchemeStr) {
         encodingScheme = encodingSchemeStr;
     }
 
     public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
-            throws IllegalAccessException, InstantiationException, IOException {
+            throws IOException {
         String bundleName = toBundleName(baseName, locale);
         String resourceName = toResourceName(bundleName, "properties");
         ResourceBundle bundle = null;

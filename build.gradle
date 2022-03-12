@@ -3,9 +3,12 @@ plugins {
     id 'java-library'
 
     id "com.github.johnrengelman.shadow" version "7.1.2"
+    id 'org.cadixdev.licenser' version '0.6.1'
+
     id "io.freefair.lombok" version "6.4.1"
 
     id 'idea'
+
 }
 
 repositories {
@@ -55,6 +58,11 @@ configurations.all {
 tasks.compileJava.configure {
     options.release.set(8)
     options.encoding = 'UTF-8'
+}
+
+license {
+    header = project.file('HEADER')
+    include '**/*.java'
 }
 
 test {
