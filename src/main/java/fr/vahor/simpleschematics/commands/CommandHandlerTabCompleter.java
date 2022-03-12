@@ -18,26 +18,30 @@
 package fr.vahor.simpleschematics.commands;
 
 import fr.vahor.simpleschematics.API;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class CommandHandlerTabCompleter implements TabCompleter {
 
     private final List<String> complete0 = Arrays.asList("help", "menu", "toggle", "schematic", "folder", "pos1", "pos2", "pos3", "reload");
-    private final List<String> complete1Folder = Arrays.asList("create", "delete", "move", "thumbnail");
-    private final List<String> complete1Schematic = Arrays.asList("create", "delete", "move", "thumbnail");
+    private final List<String> complete1Folder = Arrays.asList(/*"create", "delete", "move", */"thumbnail");
+    private final List<String> complete1Schematic = Arrays.asList("create", /*"delete", "move", */"thumbnail");
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         String lastArg = args[args.length - 1];
-        if(args.length == 1){
+        if (args.length == 1) {
             return filteredComplete(complete0, lastArg);
         }
 
-        if(args.length == 2) {
+        if (args.length == 2) {
             if (args[0].equalsIgnoreCase("folder") || args[0].equalsIgnoreCase("f")) {
                 return filteredComplete(complete1Folder, lastArg);
             }
@@ -45,8 +49,16 @@ public class CommandHandlerTabCompleter implements TabCompleter {
                 return filteredComplete(complete1Schematic, lastArg);
             }
         }
-        else if(args.length == 3) {
-            return filteredComplete(API.getFoldersNames(), lastArg);
+        else if (args.length == 3) {
+            // todo implement our own counting utils
+            //  we want to stop at exactly {lastArgLevel}. Here if we have 10 '.' but needs 2, it will loop over the whole string
+            int lastArgLevel = StringUtils.countMatches(lastArg, ".");
+            List<String> foldersNames = new ArrayList<>();
+            for (String foldersName : API.getFoldersNames()) {
+                if (StringUtils.countMatches(foldersName, ".") == lastArgLevel)
+                    foldersNames.add(foldersName);
+            }
+            return filteredComplete(foldersNames, lastArg);
         }
 
         return Collections.emptyList();
@@ -54,8 +66,9 @@ public class CommandHandlerTabCompleter implements TabCompleter {
 
     private List<String> filteredComplete(final List<String> strings, String arg) {
         List<String> result = new ArrayList<>(strings.size());
+        String lowerCaseArg = arg.toLowerCase();
         for (String string : strings) {
-            if(string.contains(arg)) result.add(string);
+            if (string.toLowerCase().contains(lowerCaseArg)) result.add(string);
         }
         return result;
     }
