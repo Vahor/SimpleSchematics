@@ -24,22 +24,44 @@ public class SchematicInventory extends InventoryBuilder {
     private final SchematicsPlayer schematicsPlayer;
 
     public SchematicInventory(Player player) {
+        this(player, API.getRootSchematicFolder());
+    }
+
+    public SchematicInventory(Player player, SchematicFolder currentFolder) {
         super(player, Bukkit.createInventory(player, 54, Message.INVENTORY_TITLE.toString()));
 
         schematicsPlayer   = API.getOrAddPlayer(player.getUniqueId());
-        this.currentFolder = API.getRootSchematicFolder();
+        this.currentFolder = currentFolder;
 
         build();
     }
 
-    public void build() {
+    private void build() {
         addGlass();
         listSchematics();
         addSelectAll();
         addRandomRotationButton();
+        addShowSelectedButton();
     }
 
-    public void listSchematics() {
+    private void addShowSelectedButton() {
+        setItem(53,
+                new ItemBuilder(Material.CHEST)
+                        .setName(Message.INVENTORY_SELECTED_INVENTORY_NAME.toString())
+                        .setLore(Message.INVENTORY_SELECTED_INVENTORY_LORE.toString().split("\n"))
+                        .build(),
+                (event) -> {
+                    event.setCancelled(true);
+                    player.closeInventory();
+                    player.openInventory(new SelectedSchematicInventory(player, currentFolder).getInventory());
+                });
+    }
+
+    private void setCurrentFolder(SchematicFolder folder) {
+        currentFolder = folder;
+    }
+
+    private void listSchematics() {
         // Clear area
         for (int row = 0; row < 4; row++) {
             for (int column = 0; column < 9; column++) {
@@ -62,7 +84,7 @@ public class SchematicInventory extends InventoryBuilder {
                                 .build(),
                         (event) -> {
                             event.setCancelled(true);
-                            currentFolder = (SchematicFolder) child;
+                            setCurrentFolder((SchematicFolder) child);
                             listSchematics();
                         });
             }
@@ -75,11 +97,14 @@ public class SchematicInventory extends InventoryBuilder {
         addPagination();
     }
 
-    public void addPagination() {
+    private void addPagination() {
+
+
+//        player.closeInventory();
 
     }
 
-    public void addSelectAll() {
+    private void addSelectAll() {
         setItem(51,
                 new ItemBuilder(Material.BARRIER)
                         .setName(Message.INVENTORY_SELECT_ALL_NAME.toString())
@@ -114,7 +139,7 @@ public class SchematicInventory extends InventoryBuilder {
                 });
     }
 
-    public void addGoBackButton() {
+    private void addGoBackButton() {
         if (currentFolder.getParent() != null) {
             setItem(49,
                     new ItemBuilder(Material.ARROW)
@@ -132,7 +157,7 @@ public class SchematicInventory extends InventoryBuilder {
         }
     }
 
-    public void addRandomRotationButton() {
+    private void addRandomRotationButton() {
         setItem(47,
                 new ItemBuilder(Material.COMPASS)
                         .setName(Message.INVENTORY_ROTATION_NAME.toString())
@@ -159,10 +184,17 @@ public class SchematicInventory extends InventoryBuilder {
     public void addSchematicIcon(final SchematicWrapper schematic, final int slot) {
         boolean enabled = schematicsPlayer.isSchematicEnabled(schematic);
         List<String> lore = new ArrayList<>(Arrays.asList(
-                Message.INVENTORY_SCHEMATIC_LORE.toString().split("\n")));
+                Message.INVENTORY_SCHEMATIC_LORE.toString()
+                        .replace("{path}", schematic.getPath())
+                        .split("\n")));
         Thumbnail thumbnail = schematic.getThumbnail();
         if (thumbnail != null) {
-            lore.addAll(thumbnail.getCachedList());
+            if (thumbnail.getCachedList().isEmpty()) {
+                lore.add(Message.THUMBNAIL_NOT_FOUND_LORE.toString());
+            }
+            else {
+                lore.addAll(thumbnail.getCachedList());
+            }
         }
         else {
             final SchematicFolder folderWhenStarted = currentFolder;
@@ -170,7 +202,7 @@ public class SchematicInventory extends InventoryBuilder {
                 if (currentFolder == folderWhenStarted) // If still in the same folder
                     addSchematicIcon(schematic, slot);
             });
-            lore.add("todo loading"); // todo loading lore
+            lore.add(Message.LOADING_THUMBNAIL_LORE.toString());
         }
 
         setItem(slot,

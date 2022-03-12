@@ -13,19 +13,22 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 public class SchematicsPlayer {
 
     @Getter private final UUID uuid;
 
-    @Getter Vector[] pos = new Vector[3];
+    @Getter private final Vector[] pos = new Vector[3];
     @Getter @Setter int posIndex = 0;
 
     @Getter boolean inSelectionMode = false;
     @Getter @Setter RotationMode rotationMode = RotationMode.DEFAULT;
 
-    List<SchematicWrapper> selectedSchematics = new ArrayList<>(4);
+    @Getter private final List<SchematicWrapper> selectedSchematics = new ArrayList<>(4);
 
     @Getter private final FawePlayer<?> fawePlayer;
     @Getter private final Player player;

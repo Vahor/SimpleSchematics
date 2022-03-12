@@ -13,6 +13,10 @@ public abstract class ASchematic implements Comparable<ASchematic> {
     private final String name;
     private SchematicFolder parent = null; // Null for root folder
 
+    private String cachedPath = null; // todo add better cache system
+    private String cachedSeparator = null;
+    private String cachedExtension = null;
+
     public ASchematic(String name) {
         this.name = name;
     }
@@ -42,11 +46,18 @@ public abstract class ASchematic implements Comparable<ASchematic> {
     }
 
     public String getPath(String separator, String extension) {
+        if (separator.equals(cachedSeparator) && extension.equals(cachedExtension)) {
+            return cachedPath;
+        }
         String path = "";
         if (parent != null && parent.getParent() != null)
             path += parent.getPath(separator, "") + separator;
         path += name;
         path += extension;
+
+        cachedPath      = path;
+        cachedExtension = extension;
+        cachedSeparator = separator;
         return path;
     }
 
@@ -54,6 +65,13 @@ public abstract class ASchematic implements Comparable<ASchematic> {
         String path = getPath(API.SYSTEM_SEPARATOR);
         File file = new File(API.getConfiguration().getSchematicsFolderPath(), path);
         return file.getAbsoluteFile();
+    }
+
+    public void clearCache() {
+        // todo call this method when moving parent/renaming
+        cachedPath = null;
+        cachedSeparator = null;
+        cachedExtension = null;
     }
 
     @Override
