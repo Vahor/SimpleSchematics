@@ -28,13 +28,12 @@ import fr.vahor.simpleschematics.utils.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SelectedSchematicInventory extends InventoryBuilder {
+public class SelectedSchematicInventory extends ASchematicInventory {
 
     private final SchematicsPlayer schematicsPlayer;
     private final SchematicFolder previousFolder;
@@ -44,25 +43,19 @@ public class SelectedSchematicInventory extends InventoryBuilder {
 
         schematicsPlayer    = API.getOrAddPlayer(player.getUniqueId());
         this.previousFolder = previousFolder;
-
-        setItemsPerPage(36);
-
         build();
+
     }
 
     @Override
-    public void onPageChanged() {
-        listSchematics();
-    }
-
     public void build() {
-        listSchematics();
+        super.build();
         addGoBackButton();
-        addGlass();
         addDeselectAll();
     }
 
-    public void listSchematics() {
+    @Override
+    protected void addSchematics() {
         // Clear area
         for (int row = 0; row < 4; row++) {
             for (int column = 0; column < 9; column++) {
@@ -87,38 +80,6 @@ public class SelectedSchematicInventory extends InventoryBuilder {
         addPagination();
     }
 
-    private void addPagination() {
-
-        if (isFirstPage()) {
-            setItem(48, null, null);
-        }
-        else {
-            setItem(48,
-                    new ItemBuilder(Material.DIRT)
-                            .setName(Message.INVENTORY_PREVIOUS_NAME.toString())
-                            .setLore(Message.INVENTORY_PREVIOUS_LORE.toString().split("\n"))
-                            .build(), event -> {
-                        event.setCancelled(true);
-                        setCurrentPage(getCurrentPage() - 1);
-                    });
-        }
-
-        if (isLastPage()) {
-            setItem(50, null, null);
-        }
-        else {
-            setItem(50,
-                    new ItemBuilder(Material.DIAMOND)
-                            .setName(Message.INVENTORY_NEXT_NAME.toString())
-                            .setLore(Message.INVENTORY_NEXT_LORE.toString().split("\n"))
-                            .build(), event -> {
-                        event.setCancelled(true);
-                        setCurrentPage(getCurrentPage() + 1);
-                    });
-        }
-
-    }
-
     private void addDeselectAll() {
         setItem(51,
                 new ItemBuilder(Material.BARRIER)
@@ -130,7 +91,7 @@ public class SelectedSchematicInventory extends InventoryBuilder {
 
                     schematicsPlayer.getSelectedSchematics().clear();
 
-                    listSchematics();
+                    addSchematics();
 
                 });
     }
@@ -178,16 +139,13 @@ public class SelectedSchematicInventory extends InventoryBuilder {
                     schematicsPlayer.deselectSchematic(schematic);
                     player.sendMessage(Message.PREFIX + Message.SCHEMATIC_DISABLED.toString().replace("{name}", schematic.getName()));
 
-                    listSchematics();
+                    if (itemsInPage() == 1 && slot == 0 && getCurrentPage() != 0) {
+                        setCurrentPage(getCurrentPage() - 1);
+                    }
+                    else {
+                        addSchematics();
+                    }
                 });
-    }
-
-    private void addGlass() {
-        ItemStack glass = new ItemBuilder(Material.STAINED_GLASS_PANE).setName(" ").build();
-        for (int column = 0; column < 9; column++) {
-            setItem(36 + column, glass,
-                    (event) -> event.setCancelled(true));
-        }
     }
 
 }

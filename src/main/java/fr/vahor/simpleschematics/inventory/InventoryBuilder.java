@@ -52,6 +52,10 @@ public abstract class InventoryBuilder {
         return (currentPage+1) * itemsPerPage >= totalItems;
     }
 
+    protected int itemsInPage() {
+        return totalItems - (currentPage * itemsPerPage);
+    }
+
     protected boolean isFirstPage() {
         return currentPage == 0;
     }
