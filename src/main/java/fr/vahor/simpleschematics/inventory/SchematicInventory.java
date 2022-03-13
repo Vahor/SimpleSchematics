@@ -187,7 +187,6 @@ public class SchematicInventory extends InventoryBuilder {
                             }
                         }
                     }
-                    addSelectAll();
                     listSchematics();
 
                 });

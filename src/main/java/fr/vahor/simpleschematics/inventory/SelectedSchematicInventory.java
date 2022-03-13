@@ -59,6 +59,7 @@ public class SelectedSchematicInventory extends InventoryBuilder {
         listSchematics();
         addGoBackButton();
         addGlass();
+        addDeselectAll();
     }
 
     public void listSchematics() {
@@ -116,6 +117,22 @@ public class SelectedSchematicInventory extends InventoryBuilder {
                     });
         }
 
+    }
+
+    private void addDeselectAll() {
+        setItem(51,
+                new ItemBuilder(Material.BARRIER)
+                        .setName(Message.INVENTORY_DESELECT_ALL_NAME.toString())
+                        .setLore(Message.INVENTORY_DESELECT_ALL_LORE.toString().split("\n"))
+                        .build(),
+                (event) -> {
+                    event.setCancelled(true);
+
+                    schematicsPlayer.getSelectedSchematics().clear();
+
+                    listSchematics();
+
+                });
     }
 
     public void addGoBackButton() {
