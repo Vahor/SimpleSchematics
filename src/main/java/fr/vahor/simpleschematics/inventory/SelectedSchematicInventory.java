@@ -45,7 +45,14 @@ public class SelectedSchematicInventory extends InventoryBuilder {
         schematicsPlayer    = API.getOrAddPlayer(player.getUniqueId());
         this.previousFolder = previousFolder;
 
+        setItemsPerPage(36);
+
         build();
+    }
+
+    @Override
+    public void onPageChanged() {
+        listSchematics();
     }
 
     public void build() {
@@ -67,6 +74,11 @@ public class SelectedSchematicInventory extends InventoryBuilder {
         int slot = 0;
         List<SchematicWrapper> schematicList = schematicsPlayer.getSelectedSchematics();
         schematicList.sort(ASchematic::compareTo);
+        setTotalItems(schematicList.size());
+
+        schematicList = schematicList.subList(getCurrentPage() * getItemsPerPage(),
+                Math.min(schematicList.size(), (getCurrentPage() + 1) * getItemsPerPage()));
+
         for (SchematicWrapper child : schematicList) {
             addSchematicIcon(child, slot++);
         }
@@ -74,7 +86,35 @@ public class SelectedSchematicInventory extends InventoryBuilder {
         addPagination();
     }
 
-    public void addPagination() {
+    private void addPagination() {
+
+        if (isFirstPage()) {
+            setItem(48, null, null);
+        }
+        else {
+            setItem(48,
+                    new ItemBuilder(Material.DIRT)
+                            .setName(Message.INVENTORY_PREVIOUS_NAME.toString())
+                            .setLore(Message.INVENTORY_PREVIOUS_LORE.toString().split("\n"))
+                            .build(), event -> {
+                        event.setCancelled(true);
+                        setCurrentPage(getCurrentPage() - 1);
+                    });
+        }
+
+        if (isLastPage()) {
+            setItem(50, null, null);
+        }
+        else {
+            setItem(50,
+                    new ItemBuilder(Material.DIAMOND)
+                            .setName(Message.INVENTORY_NEXT_NAME.toString())
+                            .setLore(Message.INVENTORY_NEXT_LORE.toString().split("\n"))
+                            .build(), event -> {
+                        event.setCancelled(true);
+                        setCurrentPage(getCurrentPage() + 1);
+                    });
+        }
 
     }
 
@@ -120,6 +160,7 @@ public class SelectedSchematicInventory extends InventoryBuilder {
                     event.setCancelled(true);
                     schematicsPlayer.deselectSchematic(schematic);
                     player.sendMessage(Message.PREFIX + Message.SCHEMATIC_DISABLED.toString().replace("{name}", schematic.getName()));
+
                     listSchematics();
                 });
     }

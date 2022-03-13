@@ -68,7 +68,7 @@ public class SchematicWrapper extends ASchematic {
                 thumbnail = new Thumbnail(null);
 
         }
-        return CompletableFuture.completedFuture(null);
+        return CompletableFuture.allOf();
     }
 
     public File getThumbnailFile() {

@@ -24,23 +24,60 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public abstract class InventoryBuilder {
 
     public static final Map<UUID, Map<Integer, Consumer<InventoryClickEvent>>> inventoryActions = new HashMap<>();
 
-    @Getter  protected final Inventory inventory;
+    @Getter protected final Inventory inventory;
     protected final Player player;
 
-    public InventoryBuilder(Player player, @NonNull  Inventory inventory) {
+    private int currentPage = 0;
+    private int itemsPerPage = 0;
+    private int totalItems = 0;
+
+    public InventoryBuilder(Player player, @NonNull Inventory inventory) {
         this.inventory = inventory;
         this.player    = player;
         inventoryActions.put(player.getUniqueId(), new HashMap<>(inventory.getSize()));
     }
 
-    public void setItem(int slot, ItemStack itemStack, Consumer<InventoryClickEvent> consumer) {
+    protected void onPageChanged() {}
+
+    protected boolean isLastPage() {
+        return (currentPage+1) * itemsPerPage >= totalItems;
+    }
+
+    protected boolean isFirstPage() {
+        return currentPage == 0;
+    }
+
+    protected int getCurrentPage(){
+        return currentPage;
+    }
+
+    protected void setCurrentPage(int currentPage) {
+        this.currentPage = currentPage;
+        onPageChanged();
+    }
+
+    protected void setItemsPerPage(int itemsPerPage) {
+        this.itemsPerPage = itemsPerPage;
+    }
+
+    protected void setTotalItems(int totalItems) {
+        this.totalItems = totalItems;
+    }
+
+    protected int getItemsPerPage() {
+        return itemsPerPage;
+    }
+
+    protected void setItem(int slot, ItemStack itemStack, Consumer<InventoryClickEvent> consumer) {
         inventoryActions.get(player.getUniqueId()).put(slot, consumer);
         inventory.setItem(slot, itemStack);
     }

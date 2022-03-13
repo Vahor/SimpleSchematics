@@ -50,7 +50,14 @@ public class SchematicInventory extends InventoryBuilder {
         schematicsPlayer   = API.getOrAddPlayer(player.getUniqueId());
         this.currentFolder = currentFolder;
 
+        setItemsPerPage(36);
+
         build();
+    }
+
+    @Override
+    public void onPageChanged() {
+        listSchematics();
     }
 
     private void build() {
@@ -90,7 +97,12 @@ public class SchematicInventory extends InventoryBuilder {
         // List items
         int slot = 0;
         List<ASchematic> schematicList = currentFolder.getChildren();
+        setTotalItems(schematicList.size());
         schematicList.sort(ASchematic::compareTo);
+
+        schematicList = schematicList.subList(getCurrentPage() * getItemsPerPage(),
+                Math.min(schematicList.size(), (getCurrentPage() + 1) * getItemsPerPage()));
+
         for (ASchematic child : schematicList) {
 
             if (child instanceof SchematicFolder) {
@@ -102,7 +114,7 @@ public class SchematicInventory extends InventoryBuilder {
                         (event) -> {
                             event.setCancelled(true);
                             setCurrentFolder((SchematicFolder) child);
-                            listSchematics();
+                            setCurrentPage(0);
                         });
             }
             else {
@@ -116,8 +128,33 @@ public class SchematicInventory extends InventoryBuilder {
 
     private void addPagination() {
 
+        if (isFirstPage()) {
+            setItem(48, null, null);
+        }
+        else {
+            setItem(48,
+                    new ItemBuilder(Material.DIRT)
+                            .setName(Message.INVENTORY_PREVIOUS_NAME.toString())
+                            .setLore(Message.INVENTORY_PREVIOUS_LORE.toString().split("\n"))
+                            .build(), event -> {
+                        event.setCancelled(true);
+                        setCurrentPage(getCurrentPage() - 1);
+                    });
+        }
 
-//        player.closeInventory();
+        if (isLastPage()) {
+            setItem(50, null, null);
+        }
+        else {
+            setItem(50,
+                    new ItemBuilder(Material.DIAMOND)
+                            .setName(Message.INVENTORY_NEXT_NAME.toString())
+                            .setLore(Message.INVENTORY_NEXT_LORE.toString().split("\n"))
+                            .build(), event -> {
+                        event.setCancelled(true);
+                        setCurrentPage(getCurrentPage() + 1);
+                    });
+        }
 
     }
 
@@ -166,7 +203,7 @@ public class SchematicInventory extends InventoryBuilder {
                     (event) -> {
                         event.setCancelled(true);
                         currentFolder = currentFolder.getParent();
-                        listSchematics();
+                        setCurrentPage(0);
                     });
         }
         else {

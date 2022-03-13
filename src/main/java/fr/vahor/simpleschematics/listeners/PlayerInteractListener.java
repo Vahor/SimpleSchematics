@@ -39,12 +39,6 @@ public class PlayerInteractListener implements Listener {
         final Player player = event.getPlayer();
         boolean hasToolInHand = player.getInventory().getItemInHand().getType() == API.getToolIcon();
 
-        if (event.getClickedBlock() != null) {
-
-            System.out.println("hasToolInHand = " + event.getClickedBlock().getTypeId());
-            System.out.println("event = " + event.getClickedBlock().getData());
-// todo remove debug
-        }
         if (!hasToolInHand || !Permissions.defaultPermission.test(player)) {
             return;
         }

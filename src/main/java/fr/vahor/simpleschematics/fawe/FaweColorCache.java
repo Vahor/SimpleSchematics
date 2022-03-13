@@ -42,5 +42,7 @@ public class FaweColorCache {
 
         CACHE_COLOR[getCombined(162, 13)] = ColorUtils.ColorData._BROWN.getColor(); // FullBlock Dark Oak Wod
 
+        CACHE_COLOR[getCombined(25, 0)] = ColorUtils.ColorData._BROWN.getColor(); // JukeBox
+
     }
 }

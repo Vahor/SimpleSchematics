@@ -262,7 +262,6 @@ public class API {
         // addFolder trees and big
 
         SchematicFolder folder = getFolderByName(folderNameWithSeparator);
-        System.out.println("foldersByName = " + foldersByName);
         // If folder already exists, return
         if (folder != null) {
             return folder;
@@ -272,8 +271,6 @@ public class API {
         SchematicFolder parent = rootSchematicFolder;
         folder = new SchematicFolder(possibleFolderNames[possibleFolderNames.length - 1]);
         StringBuilder parents = new StringBuilder();
-        System.out.println("possibleFolderNames = " + Arrays.toString(possibleFolderNames));
-        System.out.println("parents = " + parents);
 
         for (int i = 0; i < possibleFolderNames.length - 1; i++) {
             String possibleFolderName = possibleFolderNames[i];
@@ -281,15 +278,11 @@ public class API {
             // ex: possibleFolderName => big
             // But we need to check for trees.big ( trees. is parents prefix )
             SchematicFolder possibleParent = getFolderByName(parents + possibleFolderName);
-            System.out.println("parents = " + parents);
 
             if (possibleParent == null) {
                 // Register parent folder
                 possibleParent = new SchematicFolder(possibleFolderName);
                 parent.addSchematic(possibleParent);
-                System.out.println("API.getOrCreateFolder");
-                System.out.println("parent = " + parent);
-                System.out.println("possibleParent = " + possibleParent);
 
                 foldersByName.put(possibleParent.getPath(), possibleParent);
             }
