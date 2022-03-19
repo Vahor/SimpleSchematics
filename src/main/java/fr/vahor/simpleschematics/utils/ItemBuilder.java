@@ -51,6 +51,11 @@ public class ItemBuilder {
         return this;
     }
 
+    public  ItemBuilder setData(int data){
+        itemStack.setDurability((short) data);
+        return this;
+    }
+
     public ItemBuilder setLore(String[] lore) {
         meta.setLore(Arrays.asList(lore));
         return this;

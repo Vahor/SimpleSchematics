@@ -47,8 +47,10 @@ public class SchematicWrapper extends ASchematic {
     public void loadSchematic(WorldData worldData, boolean force) throws IOException {
         if (clipboard == null || force) {
             File file = getAsFile();
-            ClipboardReader reader = ClipboardFormat.SCHEMATIC.getReader(new FileInputStream(file));
-            clipboard = reader.read(worldData);
+            try (FileInputStream fis = new FileInputStream(file)) {
+                ClipboardReader reader = ClipboardFormat.SCHEMATIC.getReader(fis);
+                clipboard = reader.read(worldData);
+            }
         }
     }
 

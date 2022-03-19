@@ -69,8 +69,11 @@ public abstract class ASchematic implements Comparable<ASchematic> {
         String path = "";
         if (parent != null && parent.getParent() != null)
             path += parent.getPath(separator, "") + separator;
-        path += name;
-        path += extension;
+
+        if (!name.equals(".")) {
+            path += name;
+            path += extension;
+        }
 
         cachedPath      = path;
         cachedExtension = extension;
@@ -86,7 +89,7 @@ public abstract class ASchematic implements Comparable<ASchematic> {
 
     public void clearCache() {
         // todo call this method when moving parent/renaming
-        cachedPath = null;
+        cachedPath      = null;
         cachedSeparator = null;
         cachedExtension = null;
     }

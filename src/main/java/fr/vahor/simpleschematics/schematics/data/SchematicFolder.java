@@ -17,8 +17,14 @@
 
 package fr.vahor.simpleschematics.schematics.data;
 
+import lombok.Getter;
 import lombok.ToString;
+import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,9 +32,40 @@ import java.util.List;
 public class SchematicFolder extends ASchematic {
 
     private final List<ASchematic> children = new ArrayList<>();
+    @Getter private Material material;
+    @Getter private int materialData = 0;
 
     public SchematicFolder(String name) {
         super(name);
+    }
+
+    public void setMaterial(Material material) {
+        this.material = material;
+    }
+    public void setMaterialData(int materialData) {
+        this.materialData = materialData;
+    }
+
+    public File getConfigurationFile() {
+        return new File(getAsFile(), "folder_data.yml");
+    }
+
+    public void loadMaterial() {
+        File folderConfigFile = getConfigurationFile();
+        if (folderConfigFile.exists()) {
+            FileConfiguration folderConfig = YamlConfiguration.loadConfiguration(folderConfigFile);
+            setMaterial(Material.valueOf(folderConfig.getString("material")));
+            setMaterialData(folderConfig.getInt("data"));
+        }
+    }
+
+    public void saveMaterial() throws IOException {
+        File folderConfigFile = getConfigurationFile();
+        FileConfiguration folderConfig;
+
+        folderConfig = YamlConfiguration.loadConfiguration(folderConfigFile);
+        folderConfig.save(folderConfigFile);
+
     }
 
     @Override

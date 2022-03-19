@@ -19,7 +19,6 @@ package fr.vahor.simpleschematics.inventory;
 
 import fr.vahor.simpleschematics.API;
 import fr.vahor.simpleschematics.i18n.Message;
-import fr.vahor.simpleschematics.schematics.SchematicsPlayer;
 import fr.vahor.simpleschematics.schematics.data.ASchematic;
 import fr.vahor.simpleschematics.schematics.data.SchematicFolder;
 import fr.vahor.simpleschematics.schematics.data.SchematicWrapper;
@@ -28,7 +27,6 @@ import fr.vahor.simpleschematics.utils.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -97,8 +95,14 @@ public class SchematicInventory extends ASchematicInventory {
         for (ASchematic child : schematicList) {
 
             if (child instanceof SchematicFolder) {
+                SchematicFolder folder = ((SchematicFolder) child);
+                Material material = folder.getMaterial();
+                if (material == null)
+                    material = API.getConfiguration().getDefaultFolderMaterial();
+
                 setItem(slot++,
-                        new ItemBuilder(Material.BOOK)
+                        new ItemBuilder(material)
+                                .setData(folder.getMaterialData()) // Default to 0
                                 .setName(Message.INVENTORY_FOLDER_NAME.toString().replace("{name}", child.getName()))
                                 .setLore(Message.INVENTORY_FOLDER_LORE.toString().split("\n"))
                                 .build(),
@@ -184,8 +188,6 @@ public class SchematicInventory extends ASchematicInventory {
                     player.sendMessage(Message.PREFIX + schematicsPlayer.getRotationMode().name());
                 });
     }
-
-
 
     public void addSchematicIcon(final SchematicWrapper schematic, final int slot) {
         boolean enabled = schematicsPlayer.isSchematicEnabled(schematic);

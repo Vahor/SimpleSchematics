@@ -20,6 +20,7 @@ package fr.vahor.simpleschematics;
 import fr.vahor.simpleschematics.utils.Schema;
 import lombok.Getter;
 import lombok.ToString;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.regex.Pattern;
@@ -28,10 +29,12 @@ import java.util.regex.Pattern;
 @ToString
 public class Config {
 
+    private String schematicsFolderName;
     private String schematicsFolderPath;
     private String toolIconMaterial;
     private String separator;
     private Pattern separatorPattern;
+    private Material defaultFolderMaterial;
     private int thumbnailSize;
 
     public Config(FileConfiguration configuration) {
@@ -40,11 +43,16 @@ public class Config {
 
     public void reload(FileConfiguration configuration) {
         System.out.println("load Config");
-        schematicsFolderPath = configuration.getString("folder");
-        toolIconMaterial = configuration.getString("toolIconMaterial");
-        thumbnailSize    = configuration.getInt("thumbnailSize");
-        separator        = configuration.getString("separator");
-        separatorPattern     = Pattern.compile(String.format("\\%s", separator));
+        schematicsFolderPath  = configuration.getString("folder");
+        toolIconMaterial      = configuration.getString("toolIconMaterial");
+        thumbnailSize         = configuration.getInt("thumbnailSize");
+        separator             = configuration.getString("separator");
+        defaultFolderMaterial = Material.valueOf(configuration.getString("defaultFolderMaterial"));
+        separatorPattern      = Pattern.compile(String.format("\\%s", separator));
         Schema.generatePattern(separator);
+
+        String[] split = schematicsFolderPath.split("/");
+        schematicsFolderName = split[split.length - 1];
+
     }
 }

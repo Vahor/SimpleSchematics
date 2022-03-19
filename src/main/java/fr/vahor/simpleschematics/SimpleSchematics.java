@@ -41,12 +41,12 @@ public class SimpleSchematics extends JavaPlugin {
         writeConfigs();
         API.initializeConfiguration(getConfig());
         API.initializeLogger(getLogger());
+        API.init();
 
         API.loadSchematics();
         FaweColorCache.init();
 
         Message.loadLanguage(getDataFolder());
-        API.init();
 
         registerCommands();
         registerListeners();
@@ -55,9 +55,10 @@ public class SimpleSchematics extends JavaPlugin {
     public void reload() {
         Message.loadLanguage(getDataFolder());
         API.getPlayers().forEach(SchematicsPlayer::clearSelected);
-        API.loadSchematics();
         API.getConfiguration().reload(getConfig());
-        // todo unload schematics
+        API.init();
+
+        API.loadSchematics();
 
         // todo retirer
         FaweColorCache.init();

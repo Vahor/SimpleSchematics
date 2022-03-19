@@ -31,7 +31,7 @@ import java.util.List;
 public class CommandHandlerTabCompleter implements TabCompleter {
 
     private final List<String> complete0 = Arrays.asList("help", "menu", "toggle", "schematic", "folder", "pos1", "pos2", "pos3", "reload");
-    private final List<String> complete1Folder = Arrays.asList(/*"create", "delete", "move", */"thumbnail");
+    private final List<String> complete1Folder = Arrays.asList(/*"create", "delete", "move", */"thumbnail", "icon");
     private final List<String> complete1Schematic = Arrays.asList("create", /*"delete", "move", */"thumbnail");
 
     @Override

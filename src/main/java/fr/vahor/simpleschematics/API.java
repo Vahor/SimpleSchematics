@@ -43,6 +43,8 @@ import fr.vahor.simpleschematics.utils.Schema;
 import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.awt.image.BufferedImage;
@@ -94,6 +96,9 @@ public class API {
             toolIcon = Material.values()[1];
             e.printStackTrace();
         }
+
+        foldersByName.clear();
+        rootSchematicFolder = null;
     }
 
     public static SchematicsPlayer getOrAddPlayer(UUID uuid) {
@@ -124,6 +129,7 @@ public class API {
         }
         rootSchematicFolder = loadSchematicsInFolder(directory);
         foldersByName.put(configuration.getSeparator(), rootSchematicFolder);
+        foldersByName.values().forEach(SchematicFolder::loadMaterial);
     }
 
     private static SchematicFolder loadSchematicsInFolder(File directory) {
@@ -133,20 +139,21 @@ public class API {
             return null;
         }
 
-        SchematicFolder schematicFolder = new SchematicFolder(directory.getName());
-
+        String folderName = directory.getName();
+        if (folderName.equals(configuration.getSchematicsFolderName())) folderName = ".";
+        SchematicFolder schematicFolder = new SchematicFolder(folderName);
 
         for (File file : files) {
             ASchematic schematic;
 
-            if (file.isDirectory())
+            if (file.isDirectory()) {
                 schematic = loadSchematicsInFolder(file);
+            }
             else
                 schematic = registerSchematics(file);
 
             if (schematic != null) {
                 schematicFolder.addSchematic(schematic);
-
             }
         }
 
@@ -157,7 +164,7 @@ public class API {
                 .replace("/", configuration.getSeparator()); // Replaces all '/' by custom separator
 
         if (pathInSystem.isEmpty()) pathInSystem = configuration.getSeparator();
-        else if(pathInSystem.startsWith(configuration.getSeparator())) pathInSystem = pathInSystem.substring(configuration.getSeparator().length()); // Remove first seperator
+        else if (pathInSystem.startsWith(configuration.getSeparator())) pathInSystem = pathInSystem.substring(configuration.getSeparator().length()); // Remove first seperator
 
         foldersByName.put(pathInSystem, schematicFolder);
 
@@ -348,5 +355,143 @@ public class API {
 
     private static void unloadFolder(SchematicFolder folder) {
         foldersByName.remove(folder.getPath());
+    }
+
+    public static void trimSelection(SchematicsPlayer player) {
+
+        Vector pos1 = player.getPos()[0];
+        Vector pos2 = player.getPos()[1];
+
+        Vector minPoint = Vector.getMinimum(pos1, pos2);
+        Vector maxPoint = Vector.getMaximum(pos1, pos2);
+
+        World world = player.getPlayer().getWorld();
+
+        Vector trimBottom = getFirstNonEmptyBlock(world, minPoint, maxPoint, true);
+        Vector trimTop = getFirstNonEmptyBlock(world, minPoint, maxPoint, false);
+
+        System.out.println("minPoint = " + minPoint);
+        System.out.println("trimBottom = " + trimBottom);
+
+        System.out.println("maxPoint = " + maxPoint);
+        System.out.println("trimTop = " + trimTop);
+
+    }
+
+    @Deprecated
+    private static Vector getFirstNonEmptyBlock(World world, Vector fromCorner, Vector toCorner, boolean min) {
+        Block blockAt;
+
+        Vector vector = null;
+        int iter = 0;
+        try {
+            if (min) {
+
+
+                int maxY = toCorner.getBlockY();
+                int startY = fromCorner.getBlockY();
+
+                for (int y = startY; y <= maxY; y++) {
+                    int maxX = toCorner.getBlockX();
+                    int startX = fromCorner.getBlockX();
+
+                    int maxZ = toCorner.getBlockZ();
+                    int startZ = fromCorner.getBlockZ();
+                    while (startX <= maxX && startZ <= maxZ) {
+                        // Diagonal Iteration
+                        // Start from low corner, up to high corner. Return first non-air
+                        for (int x = startX; x <= maxX; x++) {
+
+                            blockAt = world.getBlockAt(x, y, startZ);
+
+                            iter++;
+                            Material type = blockAt.getType();
+                            if (type == Material.AIR) continue;
+                            blockAt.setType(Material.GOLD_BLOCK);
+
+
+                            vector = new Vector(x, y, startZ);
+                            break;
+                        }
+
+                        for (int z = startZ + 1; z <= maxZ; z++) {
+                            blockAt = world.getBlockAt(startX, y, z);
+
+                            iter++;
+
+                            Material type = blockAt.getType();
+                            if (type == Material.AIR) continue;
+                            blockAt.setType(Material.DIAMOND_BLOCK);
+
+
+                            Vector newVector = new Vector(startX, y, startZ);
+                            vector = vector == null ? newVector : Vector.getMinimum(newVector, vector);
+                            break;
+                        }
+
+                        if (vector != null) return vector;
+
+                        startZ++;
+                        startX++;
+                    }
+
+                }
+            }
+            else {
+
+                int minY = fromCorner.getBlockY();
+                int startY = toCorner.getBlockY();
+
+                for (int y = startY; y > minY; y--) {
+                    int minX = fromCorner.getBlockX();
+                    int startX = toCorner.getBlockX();
+
+                    int minZ = fromCorner.getBlockZ();
+                    int startZ = toCorner.getBlockZ();
+                    while (startX > minX && startZ > minZ) {
+                        // Diagonal Iteration
+                        // Start from up corner, down to low corner. Return first non-air
+                        for (int x = startX; x > minX; x--) {
+
+                            blockAt = world.getBlockAt(x, y, startZ);
+
+                            iter++;
+                            Material type = blockAt.getType();
+                            if (type == Material.AIR) continue;
+                            blockAt.setType(Material.IRON_BLOCK);
+
+
+                            vector = new Vector(x, y, startZ);
+                            break;
+                        }
+
+                        for (int z = startZ - 1; z > minZ; z--) {
+                            blockAt = world.getBlockAt(startX, y, z);
+
+                            iter++;
+
+                            Material type = blockAt.getType();
+                            if (type == Material.AIR) continue;
+                            blockAt.setType(Material.REDSTONE_BLOCK);
+
+
+                            Vector newVector = new Vector(startX, y, startZ);
+                            vector = vector == null ? newVector : Vector.getMinimum(newVector, vector);
+                            break;
+                        }
+
+                        if (vector != null) return vector;
+
+                        startZ--;
+                        startX--;
+                    }
+
+                }
+            }
+        } finally {
+            System.out.println("iter = " + iter);
+        }
+
+        return fromCorner;
     }
 }

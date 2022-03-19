@@ -45,7 +45,6 @@ public enum Message {
     INVENTORY_GO_BACK_NAME,
     INVENTORY_GO_BACK_LORE,
 
-
     INVENTORY_DESELECT_ALL_NAME,
     INVENTORY_DESELECT_ALL_LORE,
 
@@ -75,6 +74,9 @@ public enum Message {
 
     SCHEMATIC_ENABLED,  // {name}
     SCHEMATIC_DISABLED,  // {name}
+
+    INVALID_MATERIAL,
+
 
     ;
 
