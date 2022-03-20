@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 public class Thumbnail {
 
-    public static int MAX_THUMBNAIL_SIZE = 100;
+    public static int MAX_THUMBNAIL_SIZE = 512;
 
     @Getter private List<String> cachedList;
 

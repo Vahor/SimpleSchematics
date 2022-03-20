@@ -1,5 +1,5 @@
 folder: 'plugins/SimpleSchematics/schematics'
 toolIconMaterial: 'INK_SACK'
 separator: '.'
-thumbnailSize: 40
+thumbnailSize: 45
 defaultFolderMaterial: 'BOOK'
