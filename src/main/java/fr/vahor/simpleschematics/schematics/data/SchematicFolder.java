@@ -17,6 +17,7 @@
 
 package fr.vahor.simpleschematics.schematics.data;
 
+import fr.vahor.simpleschematics.API;
 import lombok.Getter;
 import lombok.ToString;
 import org.bukkit.Material;
@@ -64,6 +65,9 @@ public class SchematicFolder extends ASchematic {
         FileConfiguration folderConfig;
 
         folderConfig = YamlConfiguration.loadConfiguration(folderConfigFile);
+        if (material == null) material = API.getConfiguration().getDefaultFolderMaterial();
+        folderConfig.set("material", material.name());
+        folderConfig.set("data", materialData);
         folderConfig.save(folderConfigFile);
 
     }
