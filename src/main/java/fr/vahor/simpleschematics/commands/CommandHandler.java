@@ -141,12 +141,12 @@ public class CommandHandler implements CommandExecutor {
 
                 // Manage whole folder
                 if (args[0].equalsIgnoreCase("folder") || args[0].equalsIgnoreCase("f")) {
+                    String folderNameWithSeparator = args[2];
                     if (args.length == 3) {
-                        String folderNameWithSeparator = args[2];
 
 
                         if (commandName.equalsIgnoreCase("thumbnail") || commandName.equalsIgnoreCase("t")) {
-                            generateThumbnailForFolder(schematicsPlayer, folderNameWithSeparator);
+                            generateThumbnailForFolder(schematicsPlayer, folderNameWithSeparator, false);
                             return true;
                         }
                         else if (commandName.equalsIgnoreCase("icon") || commandName.equalsIgnoreCase("i")) {
@@ -156,9 +156,11 @@ public class CommandHandler implements CommandExecutor {
 
                     }
                     else if (args.length == 4) {
-                        if (commandName.equalsIgnoreCase("move") || commandName.equalsIgnoreCase("mv")) {
-                            API.moveFolder("trees.big", "trees.test.truc.b");
-                            return true;
+                        if (commandName.equalsIgnoreCase("thumbnail") || commandName.equalsIgnoreCase("t")) {
+                            if (args[3].equalsIgnoreCase("-r")) {
+                                generateThumbnailForFolder(schematicsPlayer, folderNameWithSeparator, true);
+                                return true;
+                            }
                         }
                     }
 
@@ -196,11 +198,11 @@ public class CommandHandler implements CommandExecutor {
             } catch (InvalidSchematicNameException e) {
                 player.sendMessage("todo Nom de schematic invalide");
                 e.printStackTrace();
+            } catch (FolderNotFoundException e) {
+                player.getPlayer().sendMessage(Message.PREFIX + Message.FOLDER_DONT_EXIST.toString());
+                e.printStackTrace();
             } catch (InvalidFolderNameException e) {
                 player.sendMessage("todo Nom de dossier invalide");
-                e.printStackTrace();
-            } catch (FolderNotFoundException e) {
-                player.sendMessage("todo Ce dossier n'existe pas");
                 e.printStackTrace();
             } catch (NullPointerException e) {
                 player.sendMessage("todo Selection invalide");
@@ -218,35 +220,42 @@ public class CommandHandler implements CommandExecutor {
         return false;
     }
 
-    private void generateThumbnailForFolder(SchematicsPlayer player, String folderNameWithSeparator) {
+    private void generateThumbnailForFolder(SchematicsPlayer player, String folderNameWithSeparator, boolean recursive) throws FolderNotFoundException {
         SchematicFolder folder = API.getFolderByName(folderNameWithSeparator);
         if (folder == null) {
-            player.getPlayer().sendMessage(Message.PREFIX + Message.FOLDER_DONT_EXIST.toString());
-            return;
+            throw new FolderNotFoundException();
         }
 
+        generateThumbnailForFolder(player, folder, recursive);
+
+    }
+
+    private void generateThumbnailForFolder(SchematicsPlayer player, SchematicFolder folder, boolean recursive) {
         for (ASchematic child : folder.getChildren()) {
             try {
                 if (child instanceof SchematicWrapper) {
                     ((SchematicWrapper) child).loadSchematic(player.getFawePlayer().getWorld().getWorldData(), false);
                     API.generateThumbnail((SchematicWrapper) child);
                 }
+                else if (recursive && child instanceof SchematicFolder) {
+                    generateThumbnailForFolder(player, (SchematicFolder) child, true);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        player.getPlayer().sendMessage(Message.PREFIX + "todo generateThumbnailForFolder");
+
+        player.getPlayer().sendMessage(Message.PREFIX + "todo generateThumbnailForFolder + " + folder.getName());
     }
 
-    private void updateFolderIcon(SchematicsPlayer player, String folderNameWithSeparator) throws IOException {
+    private void updateFolderIcon(SchematicsPlayer player, String folderNameWithSeparator) throws IOException, FolderNotFoundException {
         SchematicFolder folder = API.getFolderByName(folderNameWithSeparator);
         if (folder == null) {
-            player.getPlayer().sendMessage(Message.PREFIX + Message.FOLDER_DONT_EXIST.toString());
-            return;
+            throw new FolderNotFoundException();
         }
         ItemStack itemInHand = player.getPlayer().getItemInHand();
         Material material = itemInHand.getType();
-        if(material == null || material == Material.AIR){
+        if (material == null || material == Material.AIR) {
             player.getPlayer().sendMessage(Message.PREFIX + Message.INVALID_MATERIAL.toString());
             return;
         }

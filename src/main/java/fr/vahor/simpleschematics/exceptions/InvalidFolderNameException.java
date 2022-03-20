@@ -17,5 +17,5 @@
 
 package fr.vahor.simpleschematics.exceptions;
 
-public class InvalidFolderNameException extends FolderNotFoundException {
+public class InvalidFolderNameException extends Exception {
 }
