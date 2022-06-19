@@ -26,7 +26,10 @@ import fr.vahor.simpleschematics.schematics.data.SchematicWrapper;
 import fr.vahor.simpleschematics.utils.ItemBuilder;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.io.IOException;
@@ -40,15 +43,12 @@ public class SchematicsPlayer {
     @Getter private final UUID uuid;
 
     @Getter private final Vector[] pos = new Vector[3];
-    @Getter @Setter int posIndex = 0;
-
-    @Getter boolean inSelectionMode = false;
-    @Getter @Setter RotationMode rotationMode = RotationMode.DEFAULT;
-
     @Getter private final List<SchematicWrapper> selectedSchematics = new ArrayList<>(4);
-
     @Getter private final FawePlayer<?> fawePlayer;
     @Getter private final Player player;
+    @Getter @Setter int posIndex = 0;
+    @Getter boolean inSelectionMode = false;
+    @Getter @Setter RotationMode rotationMode = RotationMode.DEFAULT;
 
     public SchematicsPlayer(UUID uuid) {
         this.uuid = uuid;
@@ -68,6 +68,7 @@ public class SchematicsPlayer {
             schematic.loadSchematic(fawePlayer.getPlayer().getWorld().getWorldData(), false);
         }
     }
+
     public void deselectSchematic(SchematicWrapper schematic) {
         selectedSchematics.remove(schematic);
     }
@@ -127,13 +128,12 @@ public class SchematicsPlayer {
     public void setPosition(int index, Vector location, boolean withMessage) {
         pos[index] = location;
         if (withMessage) {
-            if (index == 2) {
-                // copy message
-                player.sendMessage("todo copy pos set" + location);
-            }
-            else {
-                player.sendMessage("todo pos" + (index + 1) + " set" + location);
-            }
+            player.sendMessage(Message.PREFIX + Message.COMMAND_POSITION_SET.toString()
+                    .replace("{x}", String.valueOf(location.getBlockX())).
+                    replace("{y}", String.valueOf(location.getBlockY()))
+                    .replace("{z}", String.valueOf(location.getBlockZ()))
+                    .replace("{index}", String.valueOf(index + 1))
+            );
         }
     }
 
@@ -151,12 +151,17 @@ public class SchematicsPlayer {
                         .build());
     }
 
+    public void sendActionBar(String message) {
+        PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + message.replace("&", "§") + "\"}"), (byte) 2);
+        ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+    }
+
     @Override
     public String toString() {
         return "SchematicsPlayer{" +
-                "uuid=" + uuid +
-                ", selectedSchematics=" + selectedSchematics +
-                ", fawePlayer=" + fawePlayer +
-                '}';
+               "uuid=" + uuid +
+               ", selectedSchematics=" + selectedSchematics +
+               ", fawePlayer=" + fawePlayer +
+               '}';
     }
 }

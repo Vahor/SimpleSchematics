@@ -32,6 +32,7 @@ import fr.vahor.simpleschematics.exceptions.FolderNotFoundException;
 import fr.vahor.simpleschematics.exceptions.InvalidFolderNameException;
 import fr.vahor.simpleschematics.exceptions.InvalidSchematicNameException;
 import fr.vahor.simpleschematics.fawe.PNGWriter;
+import fr.vahor.simpleschematics.i18n.Message;
 import fr.vahor.simpleschematics.schematics.Direction;
 import fr.vahor.simpleschematics.schematics.RotationMode;
 import fr.vahor.simpleschematics.schematics.SchematicsPlayer;
@@ -39,9 +40,9 @@ import fr.vahor.simpleschematics.schematics.data.ASchematic;
 import fr.vahor.simpleschematics.schematics.data.SchematicFolder;
 import fr.vahor.simpleschematics.schematics.data.SchematicWrapper;
 import fr.vahor.simpleschematics.schematics.data.Thumbnail;
+import fr.vahor.simpleschematics.utils.OutputHelper;
 import fr.vahor.simpleschematics.utils.Schema;
 import lombok.Getter;
-import org.apache.commons.io.FileUtils;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -199,7 +200,7 @@ public class API {
             ClipboardWriter writerSchematic = ClipboardFormat.SCHEMATIC.getWriter(schematicOutput);
             writerSchematic.write(clipboard, clipboard.getRegion().getWorld().getWorldData());
 
-            System.out.println(fileName + " saved " + schematicFile.getCanonicalPath());
+            OutputHelper.info("Saved " + fileName + " to " + schematicFile.getCanonicalPath());
         }
 
         generateThumbnail(schematic); // todo async
@@ -214,7 +215,7 @@ public class API {
             BufferedImage bufferedImage = writer.write(clipboard, Thumbnail.MAX_THUMBNAIL_SIZE);
             schematic.setThumbnail(new Thumbnail(bufferedImage));
 
-            System.out.println(schematic.getName() + " thumbnail saved " + thumbnailFile.getCanonicalPath());
+            OutputHelper.info(schematic.getName() + " thumbnail saved " + thumbnailFile.getCanonicalPath());
         }
     }
 
@@ -255,7 +256,7 @@ public class API {
             LocalSession localSession = manager.get(player.getFawePlayer().getPlayer());
             localSession.remember(editSession);
         } catch (FaweException e) {
-            player.getPlayer().sendMessage("todo fawe /wea");
+            player.getPlayer().sendMessage(Message.PREFIX + Message.FAWE_ERROR.toString());
             e.printStackTrace();
         }
     }

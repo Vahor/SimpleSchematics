@@ -50,7 +50,7 @@ public class PlayerInteractListener implements Listener {
         boolean isRightClick = (event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK));
         boolean isLeftClick = !isRightClick && (event.getAction().equals(Action.LEFT_CLICK_AIR) || event.getAction().equals(Action.LEFT_CLICK_BLOCK));
 
-        if (schematicsPlayer.isInSelectionMode()) {
+        if (isLeftClick && schematicsPlayer.isInSelectionMode()) {
             Location location = event.getClickedBlock().getLocation();
             Vector blockVector = new Vector(location.getX(), location.getY(), location.getZ());
             schematicsPlayer.setPosition(
@@ -72,7 +72,7 @@ public class PlayerInteractListener implements Listener {
                 Vector targetBlock = new TargetBlock(schematicsPlayer.getFawePlayer().getPlayer(), 100, 0.2).getTargetBlock();
 
                 if (targetBlock == null) {
-                    player.sendMessage(Message.PREFIX + "todo pas ce cible");
+                    player.sendMessage(Message.PREFIX + Message.EMPTY_BLOCK_TARGET.toString());
                     return;
                 }
 

@@ -138,7 +138,7 @@ public class SchematicInventory extends ASchematicInventory {
                                 }
                             }
                         } catch (IOException e) {
-                            player.sendMessage(Message.PREFIX + "todo erreur chargements");
+                            player.sendMessage(Message.PREFIX + Message.UNKNOWN_ERROR.toString());
                             e.printStackTrace();
                         }
                     }

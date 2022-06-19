@@ -54,6 +54,10 @@ public class CommandHandler implements CommandExecutor {
 
         final Player player = (Player) sender;
         if (!Permissions.defaultPermission.test(player)) {
+            String message = Message.NO_PERMISSION.toString();
+            if (message.length() > 0) {
+                player.sendMessage(Message.PREFIX + Message.NO_PERMISSION.toString());
+            }
             return false;
         }
 
@@ -62,6 +66,7 @@ public class CommandHandler implements CommandExecutor {
         if (args.length == 0) {
             // Default command, gives tool
             schematicsPlayer.giveTool();
+            player.sendMessage(Message.PREFIX + Message.COMMAND_TOOL.toString());
             return true;
         }
 
@@ -76,7 +81,7 @@ public class CommandHandler implements CommandExecutor {
             // Open menu
             if (args[0].equalsIgnoreCase("toggle") || args[0].equalsIgnoreCase("t")) {
                 schematicsPlayer.toggleSelectionMode();
-                player.sendMessage("todo toggle : " + schematicsPlayer.isInSelectionMode());
+                player.sendMessage(Message.PREFIX + Message.COMMAND_TOGGLE.toString().replace("{enabled}", schematicsPlayer.isInSelectionMode() ? "enabled" : "disabled"));
                 return true;
             }
 
@@ -97,37 +102,31 @@ public class CommandHandler implements CommandExecutor {
                 return true;
             }
 
-//            if (args[0].equalsIgnoreCase("trim")) {
-//                API.trimSelection(schematicsPlayer);
-//                return true;
-//            }
-
-
             if (args[0].equalsIgnoreCase("reload") || args[0].equalsIgnoreCase("rl")) {
                 SimpleSchematics.getInstance().reload();
-                player.sendMessage("todo rl");
+                player.getPlayer().sendMessage(Message.PREFIX + Message.COMMAND_RELOADED.toString());
                 return true;
             }
 
             // Help info for commands
             if (args[0].equalsIgnoreCase("help") || args[0].equalsIgnoreCase("h")) {
-                player.sendMessage("todo Help level 0");
+                player.getPlayer().sendMessage(Message.GLOBAL_HELP.toString());
                 return true;
             }
 
 
             if (args[0].equalsIgnoreCase("schematic") || args[0].equalsIgnoreCase("s")) {
-                player.sendMessage("todo Help schematic");
+                player.getPlayer().sendMessage(Message.SCHEMATIC_HELP.toString());
                 return true;
             }
 
             if (args[0].equalsIgnoreCase("folder") || args[0].equalsIgnoreCase("f")) {
-                player.sendMessage("todo Help folder");
+                player.getPlayer().sendMessage(Message.FOLDER_HELP.toString());
                 return true;
             }
 
 
-            player.sendMessage("todo type /s help pour voir la liste des commandes");
+            player.getPlayer().sendMessage(Message.PREFIX + Message.UNKNOWN_COMMAND.toString());
             return true;
 
         }
@@ -144,19 +143,13 @@ public class CommandHandler implements CommandExecutor {
                     if (args.length == 3) {
                         String folderNameWithSeparator = args[2];
 
-                        if (commandName.equalsIgnoreCase("thumbnail") || commandName.equalsIgnoreCase("t")) {
-                            generateThumbnailForFolder(schematicsPlayer, folderNameWithSeparator, false);
-                            return true;
-                        }
-                        else if (commandName.equalsIgnoreCase("icon") || commandName.equalsIgnoreCase("i")) {
+                        if (commandName.equalsIgnoreCase("icon") || commandName.equalsIgnoreCase("i")) {
                             updateFolderIcon(schematicsPlayer, folderNameWithSeparator);
                             return true;
                         }
 
                     }
                     else {
-
-                        System.out.println("args.length = " + args.length);
 
                         String folderNameWithSeparator = args[3];
                         if (commandName.equalsIgnoreCase("thumbnail") || commandName.equalsIgnoreCase("t")) {
@@ -172,7 +165,7 @@ public class CommandHandler implements CommandExecutor {
                         }
                     }
 
-                    player.sendMessage("todo type /s folder pour voir la liste des commandes");
+                    player.getPlayer().sendMessage(Message.FOLDER_HELP.toString());
                     return true;
                 }
 
@@ -188,38 +181,32 @@ public class CommandHandler implements CommandExecutor {
                                 return true;
                             }
                         }
-                        else if (args.length == 5 || args.length == 6) {
-                            String targetFolder = args[4];
-                            String targetSchematicName = args.length == 5 ? schematicName : args[5];
-
-                            // s s move folder schematicName targetFolder [targetSchematicName]
-
-                        }
                     }
 
-                    player.sendMessage("todo type /s schematic pour voir la liste des commandes");
+                    player.getPlayer().sendMessage(Message.SCHEMATIC_HELP.toString());
                     return true;
+
                 }
 
-                player.sendMessage("help level 1");
+
+                player.getPlayer().sendMessage(Message.PREFIX + Message.UNKNOWN_COMMAND.toString());
+                return true;
+
 
             } catch (InvalidSchematicNameException e) {
-                player.sendMessage("todo Nom de schematic invalide");
+                player.getPlayer().sendMessage(Message.PREFIX + Message.INVALID_SCHEMATIC_NAME.toString());
                 e.printStackTrace();
             } catch (FolderNotFoundException e) {
                 player.getPlayer().sendMessage(Message.PREFIX + Message.FOLDER_DONT_EXIST.toString());
                 e.printStackTrace();
             } catch (InvalidFolderNameException e) {
-                player.sendMessage("todo Nom de dossier invalide");
+                player.getPlayer().sendMessage(Message.PREFIX + Message.INVALID_FOLDER_NAME.toString());
                 e.printStackTrace();
             } catch (NullPointerException e) {
-                player.sendMessage("todo Selection invalide");
-                e.printStackTrace();
-            } catch (IOException e) {
-                player.sendMessage("todo Erreur lors de l'écriture");
+                player.getPlayer().sendMessage(Message.PREFIX + Message.INVALID_SELECTION.toString());
                 e.printStackTrace();
             } catch (Exception e) {
-                player.sendMessage("todo Erreur lors de execution");
+                player.getPlayer().sendMessage(Message.PREFIX + Message.UNKNOWN_ERROR.toString());
                 e.printStackTrace();
             }
 
@@ -235,7 +222,10 @@ public class CommandHandler implements CommandExecutor {
         }
 
         generateThumbnailForFolder(player, folder, recursive);
-
+        player.getPlayer().sendMessage(Message.PREFIX + Message.COMMAND_THUMBNAIL_GENERATE.toString()
+                .replace("{folder}", folderNameWithSeparator)
+                .replace("{recursive}", recursive ? "true" : "false")
+        );
     }
 
     public void toggleThumbnailForFolder(SchematicsPlayer player, String folderNameWithSeparator) throws FolderNotFoundException, IOException {
@@ -246,11 +236,16 @@ public class CommandHandler implements CommandExecutor {
 
         folder.setGenerateThumbnail(!folder.isGenerateThumbnail());
         folder.saveConfiguration();
-        player.getPlayer().sendMessage(Message.PREFIX + "todo Thumbnail for folder " + folderNameWithSeparator + " is now " + folder.isGenerateThumbnail());
-
+        player.getPlayer().sendMessage(Message.PREFIX + Message.COMMAND_THUMBNAIL_TOGGLE.toString()
+                .replace("{folder}", folderNameWithSeparator)
+                .replace("{enabled}", folder.isGenerateThumbnail() ? "true" : "false")
+        );
     }
 
     private void generateThumbnailForFolder(SchematicsPlayer player, SchematicFolder folder, boolean recursive) {
+
+        player.sendActionBar(Message.COMMAND_THUMBNAIL_GENERATE_ACTION_BAR.toString().replace("{folder}", folder.getName()));
+
         for (ASchematic child : folder.getChildren()) {
             try {
                 if (child instanceof SchematicWrapper) {
@@ -265,7 +260,6 @@ public class CommandHandler implements CommandExecutor {
             }
         }
 
-        player.getPlayer().sendMessage(Message.PREFIX + "todo generateThumbnailForFolder + " + folder.getName());
     }
 
     private void updateFolderIcon(SchematicsPlayer player, String folderNameWithSeparator) throws IOException, FolderNotFoundException {
@@ -284,7 +278,10 @@ public class CommandHandler implements CommandExecutor {
         folder.setMaterial(material);
         folder.saveConfiguration();
 
-        player.getPlayer().sendMessage(Message.PREFIX + "todo updateFolderIcon");
+        player.getPlayer().sendMessage(Message.PREFIX + Message.COMMAND_FOLDER_UPDATE_ICON.toString()
+                .replace("{folder}", folderNameWithSeparator)
+                .replace("{material}", material.name())
+                .replace("{data}", itemInHand.getData().getData() + ""));
     }
 
     private void createSchematic(SchematicsPlayer player, String folderNameWithSeparator, String schematicName) throws InvalidFolderNameException,
@@ -318,7 +315,10 @@ public class CommandHandler implements CommandExecutor {
 
             API.addNewSchematic(clipboard, folder, schematicName);
 
-            player.getPlayer().sendMessage(Message.PREFIX + "todo created");
+            player.getPlayer().sendMessage(Message.PREFIX + Message.COMMAND_SCHEMATIC_CREATE.toString()
+                    .replace("{folder}", folderNameWithSeparator)
+                    .replace("{schematic}", schematicName));
+
         } catch (MaxChangedBlocksException e) {
             e.printStackTrace();
         }

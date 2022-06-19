@@ -29,12 +29,36 @@ public enum Message {
 
     PREFIX,
 
+    NO_PERMISSION,
+
+    GLOBAL_HELP,
+    SCHEMATIC_HELP,
+    FOLDER_HELP,
+
     FOLDER_DONT_EXIST,
 
     SCHEMATIC_DONT_EXIST,
     SCHEMATIC_ALREADY_EXIST,
-
+    INVALID_SCHEMATIC_NAME,
+    INVALID_FOLDER_NAME,
+    INVALID_SELECTION,
     EMPTY_SELECTION,
+    FAWE_ERROR,
+    UNKNOWN_ERROR,
+    UNKNOWN_COMMAND,
+    EMPTY_BLOCK_TARGET,
+
+    COMMAND_TOOL,
+    COMMAND_RELOADED,
+    COMMAND_TOGGLE,
+    COMMAND_POSITION_SET, // x,y,z, index
+
+    COMMAND_THUMBNAIL_GENERATE, // folder, recursive
+    COMMAND_THUMBNAIL_GENERATE_ACTION_BAR, // folder
+    COMMAND_THUMBNAIL_TOGGLE, // folder, enabled
+    COMMAND_FOLDER_UPDATE_ICON, // folder, material, data
+    COMMAND_SCHEMATIC_CREATE, // folder, schematic
+
 
     TOOL_NAME,
     TOOL_LORE,
@@ -80,8 +104,8 @@ public enum Message {
 
     ;
 
-    private static ResourceBundle bundle;
     private static final EncodingResourceBundleControl utf8Control = new EncodingResourceBundleControl("UTF-8");
+    private static ResourceBundle bundle;
 
     public static void loadLanguage(File dataFolder) {
         try {

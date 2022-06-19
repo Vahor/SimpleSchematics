@@ -18,6 +18,7 @@
 package fr.vahor.simpleschematics.fawe;
 
 import fr.vahor.simpleschematics.utils.ColorUtils;
+import fr.vahor.simpleschematics.utils.OutputHelper;
 
 import java.awt.*;
 
@@ -27,7 +28,7 @@ import static com.boydti.fawe.FaweCache.getCombined;
 public class FaweColorCache {
 
     public static void init() {
-        System.out.println("FaweColorCache");
+        OutputHelper.info("Initializing Fawe color cache...");
         CACHE_COLOR[getCombined(159, 13)] = new Color(85, 93, 46); // Green Stained Clay
         CACHE_COLOR[getCombined(159, 14)] = new Color(152, 67, 52); // Red Stained Clay
 

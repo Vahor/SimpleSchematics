@@ -17,6 +17,7 @@
 
 package fr.vahor.simpleschematics;
 
+import fr.vahor.simpleschematics.utils.OutputHelper;
 import fr.vahor.simpleschematics.utils.Schema;
 import lombok.Getter;
 import lombok.ToString;
@@ -42,7 +43,7 @@ public class Config {
     }
 
     public void reload(FileConfiguration configuration) {
-        System.out.println("load Config");
+        OutputHelper.info("Loading configuration...");
         schematicsFolderPath  = configuration.getString("folder");
         toolIconMaterial      = configuration.getString("toolIconMaterial");
         thumbnailSize         = configuration.getInt("thumbnailSize");

@@ -15,17 +15,19 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package fr.vahor.simpleschematics.permissions;
+package fr.vahor.simpleschematics.utils;
 
-import org.bukkit.entity.Player;
+import java.util.logging.Logger;
 
-public class Permissions {
+public class OutputHelper {
 
-    public static final Permission defaultPermission = (player) -> player.hasPermission("simpleschematic.use");
+    private static final Logger logger = Logger.getLogger("SimpleSchematics");
 
-    public interface Permission {
-        boolean test(Player player);
+    public static void info(String message) {
+        logger.info(message);
     }
 
-
+    public static void warning(String message) {
+        logger.warning(message);
+    }
 }
