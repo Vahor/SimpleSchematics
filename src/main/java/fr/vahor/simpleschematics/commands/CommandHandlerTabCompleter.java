@@ -31,8 +31,9 @@ import java.util.List;
 public class CommandHandlerTabCompleter implements TabCompleter {
 
     private final List<String> complete0 = Arrays.asList("help", "menu", "toggle", "schematic", "folder", "pos1", "pos2", "pos3", "reload");
-    private final List<String> complete1Folder = Arrays.asList(/*"create", "delete", "move", */"thumbnail", "icon");
-    private final List<String> complete1Schematic = Arrays.asList("create", /*"delete", "move", */"thumbnail");
+    private final List<String> complete1Folder = Arrays.asList("thumbnail", "icon");
+    private final List<String> complete2Folder = Arrays.asList("generate", "toggle");
+    private final List<String> complete1Schematic = Arrays.asList("create", "thumbnail");
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -40,6 +41,8 @@ public class CommandHandlerTabCompleter implements TabCompleter {
         if (args.length == 1) {
             return filteredComplete(complete0, lastArg);
         }
+
+        System.out.println("args.length = " + args.length);
 
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("folder") || args[0].equalsIgnoreCase("f")) {
@@ -49,7 +52,11 @@ public class CommandHandlerTabCompleter implements TabCompleter {
                 return filteredComplete(complete1Schematic, lastArg);
             }
         }
-        else if (args.length == 3) {
+        else if (args.length <= 4) {
+            if (args.length == 3 && args[1].equalsIgnoreCase("thumbnail") || args[1].equalsIgnoreCase("t")) {
+                return filteredComplete(complete2Folder, lastArg);
+            }
+
             // todo implement our own counting utils
             //  we want to stop at exactly {lastArgLevel}. Here if we have 10 '.' but needs 2, it will loop over the whole string
             int lastArgLevel = StringUtils.countMatches(lastArg, ".");

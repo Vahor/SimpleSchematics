@@ -141,9 +141,8 @@ public class CommandHandler implements CommandExecutor {
 
                 // Manage whole folder
                 if (args[0].equalsIgnoreCase("folder") || args[0].equalsIgnoreCase("f")) {
-                    String folderNameWithSeparator = args[2];
                     if (args.length == 3) {
-
+                        String folderNameWithSeparator = args[2];
 
                         if (commandName.equalsIgnoreCase("thumbnail") || commandName.equalsIgnoreCase("t")) {
                             generateThumbnailForFolder(schematicsPlayer, folderNameWithSeparator, false);
@@ -155,10 +154,19 @@ public class CommandHandler implements CommandExecutor {
                         }
 
                     }
-                    else if (args.length == 4) {
+                    else {
+
+                        System.out.println("args.length = " + args.length);
+
+                        String folderNameWithSeparator = args[3];
                         if (commandName.equalsIgnoreCase("thumbnail") || commandName.equalsIgnoreCase("t")) {
-                            if (args[3].equalsIgnoreCase("-r")) {
-                                generateThumbnailForFolder(schematicsPlayer, folderNameWithSeparator, true);
+                            if (args[2].equalsIgnoreCase("generate")) {
+                                boolean recursive = args.length > 4 && args[4].equalsIgnoreCase("-r");
+                                generateThumbnailForFolder(schematicsPlayer, folderNameWithSeparator, recursive);
+                                return true;
+                            }
+                            if (args[2].equalsIgnoreCase("toggle")) {
+                                toggleThumbnailForFolder(schematicsPlayer, folderNameWithSeparator);
                                 return true;
                             }
                         }
@@ -230,6 +238,18 @@ public class CommandHandler implements CommandExecutor {
 
     }
 
+    public void toggleThumbnailForFolder(SchematicsPlayer player, String folderNameWithSeparator) throws FolderNotFoundException, IOException {
+        SchematicFolder folder = API.getFolderByName(folderNameWithSeparator);
+        if (folder == null) {
+            throw new FolderNotFoundException();
+        }
+
+        folder.setGenerateThumbnail(!folder.isGenerateThumbnail());
+        folder.saveConfiguration();
+        player.getPlayer().sendMessage(Message.PREFIX + "todo Thumbnail for folder " + folderNameWithSeparator + " is now " + folder.isGenerateThumbnail());
+
+    }
+
     private void generateThumbnailForFolder(SchematicsPlayer player, SchematicFolder folder, boolean recursive) {
         for (ASchematic child : folder.getChildren()) {
             try {
@@ -262,12 +282,13 @@ public class CommandHandler implements CommandExecutor {
 
         folder.setMaterialData(itemInHand.getData().getData());
         folder.setMaterial(material);
-        folder.saveMaterial();
+        folder.saveConfiguration();
 
         player.getPlayer().sendMessage(Message.PREFIX + "todo updateFolderIcon");
     }
 
-    private void createSchematic(SchematicsPlayer player, String folderNameWithSeparator, String schematicName) throws InvalidFolderNameException, IOException, InvalidSchematicNameException {
+    private void createSchematic(SchematicsPlayer player, String folderNameWithSeparator, String schematicName) throws InvalidFolderNameException,
+            IOException, InvalidSchematicNameException {
         if (player.isSelectionInvalid()) {
             player.getPlayer().sendMessage(Message.PREFIX + Message.EMPTY_SELECTION.toString());
             return;

@@ -129,7 +129,7 @@ public class API {
         }
         rootSchematicFolder = loadSchematicsInFolder(directory);
         foldersByName.put(configuration.getSeparator(), rootSchematicFolder);
-        foldersByName.values().forEach(SchematicFolder::loadMaterial);
+        foldersByName.values().forEach(SchematicFolder::loadConfiguration);
     }
 
     private static SchematicFolder loadSchematicsInFolder(File directory) {
@@ -307,39 +307,6 @@ public class API {
         folder.getAsFile().mkdirs();
 
         return folder;
-    }
-
-    public static void moveFolder(String fromName, String toName) throws FolderNotFoundException, IOException {
-
-        // Unload fromName schematics
-        // Use file management to move
-        // Then load toName schematics with loadSchematicsInFolder
-
-        SchematicFolder fromFolder = getFolderByName(fromName);
-        if (fromFolder == null) {
-            throw new FolderNotFoundException();
-        }
-
-        // Create new folder and register schematics
-        SchematicFolder toFolder = getOrCreateFolder(toName);
-
-        // Unload currentFolder
-        unloadFolderRecursive(fromFolder);
-
-        // Move folder
-        File fromFolderAsFile = fromFolder.getAsFile();
-        FileUtils.copyDirectory(fromFolderAsFile, toFolder.getAsFile());
-        FileUtils.deleteDirectory(fromFolderAsFile);
-
-    }
-
-    public static void deleteFolder(SchematicFolder folder) throws FolderNotFoundException, IOException {
-        if (folder == null) {
-            throw new FolderNotFoundException();
-        }
-        unloadFolderRecursive(folder);
-
-        FileUtils.deleteDirectory(folder.getAsFile());
     }
 
     private static void unloadFolderRecursive(SchematicFolder folder) {

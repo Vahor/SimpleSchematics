@@ -195,22 +195,24 @@ public class SchematicInventory extends ASchematicInventory {
                 Message.INVENTORY_SCHEMATIC_LORE.toString()
                         .replace("{path}", schematic.getParent().getPath())
                         .split("\n")));
-        Thumbnail thumbnail = schematic.getThumbnail();
-        if (thumbnail != null) {
-            if (thumbnail.getCachedList().isEmpty()) {
-                lore.add(Message.THUMBNAIL_NOT_FOUND_LORE.toString());
+        if (currentFolder.isGenerateThumbnail()) {
+            Thumbnail thumbnail = schematic.getThumbnail();
+            if (thumbnail != null) {
+                if (thumbnail.getCachedList().isEmpty()) {
+                    lore.add(Message.THUMBNAIL_NOT_FOUND_LORE.toString());
+                }
+                else {
+                    lore.addAll(thumbnail.getCachedList());
+                }
             }
             else {
-                lore.addAll(thumbnail.getCachedList());
+                final SchematicFolder folderWhenStarted = currentFolder;
+                schematic.loadThumbnail(false).thenRun(() -> {
+                    if (currentFolder == folderWhenStarted) // If still in the same folder
+                        addSchematicIcon(schematic, slot);
+                });
+                lore.add(Message.LOADING_THUMBNAIL_LORE.toString());
             }
-        }
-        else {
-            final SchematicFolder folderWhenStarted = currentFolder;
-            schematic.loadThumbnail(false).thenRun(() -> {
-                if (currentFolder == folderWhenStarted) // If still in the same folder
-                    addSchematicIcon(schematic, slot);
-            });
-            lore.add(Message.LOADING_THUMBNAIL_LORE.toString());
         }
 
         setItem(slot,

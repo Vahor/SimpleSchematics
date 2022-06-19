@@ -19,6 +19,7 @@ package fr.vahor.simpleschematics.schematics.data;
 
 import fr.vahor.simpleschematics.API;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -33,34 +34,29 @@ import java.util.List;
 public class SchematicFolder extends ASchematic {
 
     private final List<ASchematic> children = new ArrayList<>();
-    @Getter private Material material;
-    @Getter private int materialData = 0;
+    @Getter @Setter private Material material;
+    @Getter @Setter private boolean generateThumbnail = true;
+    @Getter @Setter private int materialData = 0;
 
     public SchematicFolder(String name) {
         super(name);
-    }
-
-    public void setMaterial(Material material) {
-        this.material = material;
-    }
-    public void setMaterialData(int materialData) {
-        this.materialData = materialData;
     }
 
     public File getConfigurationFile() {
         return new File(getAsFile(), "folder_data.yml");
     }
 
-    public void loadMaterial() {
+    public void loadConfiguration() {
         File folderConfigFile = getConfigurationFile();
         if (folderConfigFile.exists()) {
             FileConfiguration folderConfig = YamlConfiguration.loadConfiguration(folderConfigFile);
             setMaterial(Material.valueOf(folderConfig.getString("material")));
             setMaterialData(folderConfig.getInt("data"));
+            setGenerateThumbnail(folderConfig.getBoolean("generate_thumbnail", true));
         }
     }
 
-    public void saveMaterial() throws IOException {
+    public void saveConfiguration() throws IOException {
         File folderConfigFile = getConfigurationFile();
         FileConfiguration folderConfig;
 
@@ -68,6 +64,7 @@ public class SchematicFolder extends ASchematic {
         if (material == null) material = API.getConfiguration().getDefaultFolderMaterial();
         folderConfig.set("material", material.name());
         folderConfig.set("data", materialData);
+        folderConfig.set("generate_thumbnail", generateThumbnail);
         folderConfig.save(folderConfigFile);
 
     }
