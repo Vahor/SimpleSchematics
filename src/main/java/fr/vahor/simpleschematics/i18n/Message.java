@@ -54,7 +54,7 @@ public enum Message {
     COMMAND_POSITION_SET, // x,y,z, index
 
     COMMAND_THUMBNAIL_GENERATE, // folder, recursive
-    COMMAND_THUMBNAIL_GENERATE_ACTION_BAR, // folder
+    COMMAND_THUMBNAIL_GENERATE_SUBTITLE, // folder
     COMMAND_THUMBNAIL_TOGGLE, // folder, enabled
     COMMAND_FOLDER_UPDATE_ICON, // folder, material, data
     COMMAND_SCHEMATIC_CREATE, // folder, schematic

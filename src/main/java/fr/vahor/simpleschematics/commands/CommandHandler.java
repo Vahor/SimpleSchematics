@@ -244,7 +244,7 @@ public class CommandHandler implements CommandExecutor {
 
     private void generateThumbnailForFolder(SchematicsPlayer player, SchematicFolder folder, boolean recursive) {
 
-        player.sendActionBar(Message.COMMAND_THUMBNAIL_GENERATE_ACTION_BAR.toString().replace("{folder}", folder.getName()));
+        player.getFawePlayer().sendTitle("", Message.COMMAND_THUMBNAIL_GENERATE_SUBTITLE.toString().replace("{folder}", folder.getName()));
 
         for (ASchematic child : folder.getChildren()) {
             try {

@@ -28,7 +28,6 @@ import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
 import com.sk89q.worldedit.math.transform.AffineTransform;
 import com.sk89q.worldedit.session.SessionManager;
-import fr.vahor.simpleschematics.exceptions.FolderNotFoundException;
 import fr.vahor.simpleschematics.exceptions.InvalidFolderNameException;
 import fr.vahor.simpleschematics.exceptions.InvalidSchematicNameException;
 import fr.vahor.simpleschematics.fawe.PNGWriter;

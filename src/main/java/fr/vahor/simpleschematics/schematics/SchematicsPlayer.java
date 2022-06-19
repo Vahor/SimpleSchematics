@@ -26,10 +26,7 @@ import fr.vahor.simpleschematics.schematics.data.SchematicWrapper;
 import fr.vahor.simpleschematics.utils.ItemBuilder;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.io.IOException;
@@ -149,11 +146,6 @@ public class SchematicsPlayer {
                         .setName(Message.TOOL_NAME.toString())
                         .setLore(Message.TOOL_LORE.toString().split("\n"))
                         .build());
-    }
-
-    public void sendActionBar(String message) {
-        PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + message.replace("&", "§") + "\"}"), (byte) 2);
-        ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
     }
 
     @Override
