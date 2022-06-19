@@ -34,12 +34,14 @@ import fr.vahor.simpleschematics.schematics.SchematicsPlayer;
 import fr.vahor.simpleschematics.schematics.data.ASchematic;
 import fr.vahor.simpleschematics.schematics.data.SchematicFolder;
 import fr.vahor.simpleschematics.schematics.data.SchematicWrapper;
+import fr.vahor.simpleschematics.utils.SkullUtils;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import java.io.IOException;
 
@@ -81,7 +83,8 @@ public class CommandHandler implements CommandExecutor {
             // Open menu
             if (args[0].equalsIgnoreCase("toggle") || args[0].equalsIgnoreCase("t")) {
                 schematicsPlayer.toggleSelectionMode();
-                player.sendMessage(Message.PREFIX + Message.COMMAND_TOGGLE.toString().replace("{enabled}", schematicsPlayer.isInSelectionMode() ? "enabled" : "disabled"));
+                player.sendMessage(Message.PREFIX + Message.COMMAND_TOGGLE.toString().replace("{enabled}", schematicsPlayer.isInSelectionMode() ? "enabled" :
+                        "disabled"));
                 return true;
             }
 
@@ -192,7 +195,6 @@ public class CommandHandler implements CommandExecutor {
                 player.getPlayer().sendMessage(Message.PREFIX + Message.UNKNOWN_COMMAND.toString());
                 return true;
 
-
             } catch (InvalidSchematicNameException e) {
                 player.getPlayer().sendMessage(Message.PREFIX + Message.INVALID_SCHEMATIC_NAME.toString());
                 e.printStackTrace();
@@ -263,6 +265,10 @@ public class CommandHandler implements CommandExecutor {
     }
 
     private void updateFolderIcon(SchematicsPlayer player, String folderNameWithSeparator) throws IOException, FolderNotFoundException {
+        if (folderNameWithSeparator == null || folderNameWithSeparator.isEmpty() || folderNameWithSeparator.equals(".")) {
+            player.getPlayer().sendMessage(Message.PREFIX + Message.INVALID_FOLDER_NAME.toString());
+            return;
+        }
         SchematicFolder folder = API.getFolderByName(folderNameWithSeparator);
         if (folder == null) {
             throw new FolderNotFoundException();
@@ -272,6 +278,17 @@ public class CommandHandler implements CommandExecutor {
         if (material == null || material == Material.AIR) {
             player.getPlayer().sendMessage(Message.PREFIX + Message.INVALID_MATERIAL.toString());
             return;
+        }
+
+        if (material == Material.SKULL_ITEM) {
+            SkullMeta meta = (SkullMeta) itemInHand.getItemMeta();
+
+            String skullBase64 = SkullUtils.getSkullBase64(meta);
+            if (skullBase64 == null) {
+                player.getPlayer().sendMessage(Message.PREFIX + Message.INVALID_MATERIAL.toString());
+                return;
+            }
+            folder.setSkullBase64(skullBase64);
         }
 
         folder.setMaterialData(itemInHand.getData().getData());

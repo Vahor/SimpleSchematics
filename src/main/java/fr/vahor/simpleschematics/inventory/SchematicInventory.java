@@ -24,9 +24,12 @@ import fr.vahor.simpleschematics.schematics.data.SchematicFolder;
 import fr.vahor.simpleschematics.schematics.data.SchematicWrapper;
 import fr.vahor.simpleschematics.schematics.data.Thumbnail;
 import fr.vahor.simpleschematics.utils.ItemBuilder;
+import fr.vahor.simpleschematics.utils.SkullUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -97,15 +100,23 @@ public class SchematicInventory extends ASchematicInventory {
             if (child instanceof SchematicFolder) {
                 SchematicFolder folder = ((SchematicFolder) child);
                 Material material = folder.getMaterial();
-                if (material == null)
+                if (material == null) {
                     material = API.getConfiguration().getDefaultFolderMaterial();
+                }
 
-                setItem(slot++,
-                        new ItemBuilder(material)
-                                .setData(folder.getMaterialData()) // Default to 0
-                                .setName(Message.INVENTORY_FOLDER_NAME.toString().replace("{name}", child.getName()))
-                                .setLore(Message.INVENTORY_FOLDER_LORE.toString().split("\n"))
-                                .build(),
+                ItemStack itemStack = new ItemBuilder(material)
+                        .setData(folder.getMaterialData()) // Default to 0
+                        .setName(Message.INVENTORY_FOLDER_NAME.toString().replace("{name}", child.getName()))
+                        .setLore(Message.INVENTORY_FOLDER_LORE.toString().split("\n"))
+                        .build();
+
+                if (material == Material.SKULL_ITEM && folder.getSkullBase64() != null) {
+                    SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
+                    SkullUtils.setSkullBase64(skullMeta, folder.getSkullBase64());
+                    itemStack.setItemMeta(skullMeta);
+                }
+
+                setItem(slot++, itemStack,
                         (event) -> {
                             event.setCancelled(true);
                             setCurrentFolder((SchematicFolder) child);

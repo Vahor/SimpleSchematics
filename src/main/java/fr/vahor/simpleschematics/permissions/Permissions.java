@@ -21,7 +21,7 @@ import org.bukkit.entity.Player;
 
 public class Permissions {
 
-    public static final Permission defaultPermission = (player) -> player.hasPermission("simpleschematic.use");
+    public static final Permission defaultPermission = (player) -> player.hasPermission("simpleschematics.default");
 
     public interface Permission {
         boolean test(Player player);

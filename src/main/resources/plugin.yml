@@ -3,9 +3,11 @@ main: fr.vahor.simpleschematics.SimpleSchematics
 version: '${version}'
 author: Vahor
 description: SimpleSchematics
+website: https://github.com/Vahor/SimpleSchematics
 depend: [FastAsyncWorldEdit]
 
 commands:
   s:
-    description: SimpleSchematics command
+    description: SimpleSchematics base command
+    permission: simpleschematics.default
 

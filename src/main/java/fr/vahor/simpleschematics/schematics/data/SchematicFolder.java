@@ -37,6 +37,7 @@ public class SchematicFolder extends ASchematic {
     @Getter @Setter private Material material;
     @Getter @Setter private boolean generateThumbnail = true;
     @Getter @Setter private int materialData = 0;
+    @Getter @Setter private String skullBase64 = null;
 
     public SchematicFolder(String name) {
         super(name);
@@ -51,7 +52,8 @@ public class SchematicFolder extends ASchematic {
         if (folderConfigFile.exists()) {
             FileConfiguration folderConfig = YamlConfiguration.loadConfiguration(folderConfigFile);
             setMaterial(Material.valueOf(folderConfig.getString("material")));
-            setMaterialData(folderConfig.getInt("data"));
+            setMaterialData(folderConfig.getInt("data", 0));
+            setSkullBase64(folderConfig.getString("skull_base64", null));
             setGenerateThumbnail(folderConfig.getBoolean("generate_thumbnail", true));
         }
     }
@@ -64,6 +66,7 @@ public class SchematicFolder extends ASchematic {
         if (material == null) material = API.getConfiguration().getDefaultFolderMaterial();
         folderConfig.set("material", material.name());
         folderConfig.set("data", materialData);
+        folderConfig.set("skull_base64", skullBase64);
         folderConfig.set("generate_thumbnail", generateThumbnail);
         folderConfig.save(folderConfigFile);
 
