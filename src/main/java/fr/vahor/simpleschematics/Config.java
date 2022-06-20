@@ -37,6 +37,7 @@ public class Config {
     private Pattern separatorPattern;
     private Material defaultFolderMaterial;
     private int thumbnailSize;
+    private int maximumStepsTrim;
 
     public Config(FileConfiguration configuration) {
         reload(configuration);
@@ -47,6 +48,7 @@ public class Config {
         schematicsFolderPath  = configuration.getString("folder");
         toolIconMaterial      = configuration.getString("toolIconMaterial");
         thumbnailSize         = configuration.getInt("thumbnailSize");
+        maximumStepsTrim      = configuration.getInt("maximumStepsTrim");
         separator             = configuration.getString("separator");
         defaultFolderMaterial = Material.valueOf(configuration.getString("defaultFolderMaterial"));
         separatorPattern      = Pattern.compile(String.format("\\%s", separator));

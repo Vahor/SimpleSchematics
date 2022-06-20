@@ -126,9 +126,7 @@ public class SchematicsPlayer {
         pos[index] = location;
         if (withMessage) {
             player.sendMessage(Message.PREFIX + Message.COMMAND_POSITION_SET.toString()
-                    .replace("{x}", String.valueOf(location.getBlockX())).
-                    replace("{y}", String.valueOf(location.getBlockY()))
-                    .replace("{z}", String.valueOf(location.getBlockZ()))
+                    .replace("{pos}", String.valueOf(location.toString()))
                     .replace("{index}", String.valueOf(index + 1))
             );
         }

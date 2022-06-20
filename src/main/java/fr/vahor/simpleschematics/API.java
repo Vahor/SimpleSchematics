@@ -51,21 +51,24 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class API {
 
     public static final Random RANDOM = new Random();
+    public static final String SYSTEM_SEPARATOR = System.getProperty("file.separator");
     private static final Map<UUID, SchematicsPlayer> playerMap = new HashMap<>();
     private static final Map<String, SchematicFolder> foldersByName = new HashMap<>();
     @Getter private static SchematicFolder rootSchematicFolder;
     @Getter private static Config configuration;
     @Getter private static Logger logger;
-
-    public static final String SYSTEM_SEPARATOR = System.getProperty("file.separator");
-
     @Getter private static Material toolIcon;
 
     public static void initializeConfiguration(FileConfiguration configFile) {
@@ -164,7 +167,8 @@ public class API {
                 .replace("/", configuration.getSeparator()); // Replaces all '/' by custom separator
 
         if (pathInSystem.isEmpty()) pathInSystem = configuration.getSeparator();
-        else if (pathInSystem.startsWith(configuration.getSeparator())) pathInSystem = pathInSystem.substring(configuration.getSeparator().length()); // Remove first seperator
+        else if (pathInSystem.startsWith(configuration.getSeparator())) pathInSystem = pathInSystem.substring(configuration.getSeparator().length()); //
+        // Remove first seperator
 
         foldersByName.put(pathInSystem, schematicFolder);
 
@@ -309,22 +313,7 @@ public class API {
         return folder;
     }
 
-    private static void unloadFolderRecursive(SchematicFolder folder) {
-
-        // Delete every child
-        for (ASchematic child : folder.getChildren()) {
-            if (child instanceof SchematicFolder) {
-                unloadFolderRecursive((SchematicFolder) child);
-            }
-        }
-        unloadFolder(folder);
-    }
-
-    private static void unloadFolder(SchematicFolder folder) {
-        foldersByName.remove(folder.getPath());
-    }
-
-    public static void trimSelection(SchematicsPlayer player) {
+    public static void trimSelection(SchematicsPlayer player) throws NullPointerException {
 
         Vector pos1 = player.getPos()[0];
         Vector pos2 = player.getPos()[1];
@@ -332,133 +321,202 @@ public class API {
         Vector minPoint = Vector.getMinimum(pos1, pos2);
         Vector maxPoint = Vector.getMaximum(pos1, pos2);
 
+        // Need to do it in 6 steps
+        // 1. Get First Non-Air Block in left side
+        // 2. Get First Non-Air Block in right side
+        // 3. Get First Non-Air Block in front side
+        // 4. Get First Non-Air Block in back side
+        // 5. Get First Non-Air Block in bottom side
+        // 6. Get First Non-Air Block in top side
+        // Cube is something like this
+        //          back
+        //      ----------
+        //      |        |
+        // left |        |  right
+        //      |        |
+        //      ----------
+        //          front
+        // minPoint = (0, 0, 0)
+        // maxPoint = (256, 256, 256)
+        // minPoint is the top left corner
+        // maxPoint is the bottom right corner
+        // For the first step, walk through each block in Z axis, if none of the block is air, go 1 block up and restart
+        // If z == maxPoint.getZ() and y == maxPoint.getY(), go 1 block to the right and restart
+        // And do this, until we find a non-air block
+        // For the second step, do the same
+        // For the third step, as we have already found the first non-air block on the left side, we can start from this block
+        // etc
+
         World world = player.getPlayer().getWorld();
 
-        Vector trimBottom = getFirstNonEmptyBlock(world, minPoint, maxPoint, true);
-        Vector trimTop = getFirstNonEmptyBlock(world, minPoint, maxPoint, false);
+        // top left corner - bottom right corner - z then x
+        Vector firstNonEmptyInLeftSide = getFirstNonEmptyBlock(world,
+                minPoint,
+                maxPoint,
+                0, 1, true, 1, 0);
 
-        System.out.println("minPoint = " + minPoint);
-        System.out.println("trimBottom = " + trimBottom);
+        // bottom right corner - first left - -x then -z
+        Vector firstNonEmptyInFrontSide = getFirstNonEmptyBlock(world,
+                maxPoint,
+                firstNonEmptyInLeftSide,
+                -1, 0, true, 0, -1);
 
-        System.out.println("maxPoint = " + maxPoint);
-        System.out.println("trimTop = " + trimTop);
+        // top right corner - "center" - -x then z
+        Vector firstNonEmptyInBackSide = getFirstNonEmptyBlock(world,
+                new Vector(
+                        maxPoint.getX(),
+                        maxPoint.getY(),
+                        minPoint.getZ()),
+                new Vector(
+                        minPoint.getX(),
+                        minPoint.getY(),
+                        firstNonEmptyInFrontSide.getZ()
+                ),
+                -1, 0, true, 0, 1);
+
+
+        // top right corner - "center" - z then -x
+        Vector firstNonEmptyInRightSide = getFirstNonEmptyBlock(world,
+                new Vector(
+                        maxPoint.getX(),
+                        maxPoint.getY(),
+                        minPoint.getZ()),
+                new Vector(
+                        minPoint.getX(),
+                        minPoint.getY(),
+                        firstNonEmptyInFrontSide.getZ()
+                ),
+                0, 1, true, -1, 0);
+
+        // Temporary values for corners
+        // Get top left corner
+        Vector topLeftCorner = new Vector(
+                firstNonEmptyInLeftSide.getX(),
+                maxPoint.getY(),
+                firstNonEmptyInBackSide.getZ()
+        );
+        // Get bottom right corner
+        Vector bottomRightCorner = new Vector(
+                firstNonEmptyInRightSide.getX(),
+                minPoint.getY(),
+                firstNonEmptyInFrontSide.getZ()
+        );
+
+        // Get the real bottom right corner
+        Vector firstNonEmptyInBottomSide;
+        Vector bottomRightCornerClone = new Vector(bottomRightCorner);
+        do {
+            firstNonEmptyInBottomSide = getFirstNonEmptyBlock(world,
+                    bottomRightCornerClone,
+                    topLeftCorner,
+                    0, -1, false, -1, 0);
+            bottomRightCornerClone.mutY(bottomRightCornerClone.getY() + 1);
+        } while (firstNonEmptyInBottomSide == null && bottomRightCornerClone.getY() < maxPoint.getY());
+
+        // Get the real top left corner
+        Vector firstNonEmptyInTopSide;
+        Vector topLeftCornerClone = new Vector(topLeftCorner);
+        do {
+            firstNonEmptyInTopSide = getFirstNonEmptyBlock(world,
+                    topLeftCornerClone,
+                    bottomRightCorner,
+                    0, 1, false, 1, 0);
+            topLeftCornerClone.mutY(topLeftCornerClone.getY() - 1);
+        } while (firstNonEmptyInTopSide == null && topLeftCornerClone.getY() > minPoint.getY());
+
+        // Update the temporary values, with the proper y values
+        topLeftCorner.mutY(topLeftCornerClone.getY() + 1);
+        bottomRightCorner.mutY(bottomRightCornerClone.getY() - 1);
+
+        player.setPosition(0, topLeftCorner, true);
+        player.setPosition(1, bottomRightCorner, true);
+        player.setPosIndex(2);
 
     }
 
-    @Deprecated
-    private static Vector getFirstNonEmptyBlock(World world, Vector fromCorner, Vector toCorner, boolean min) {
-        Block blockAt;
+    private static Vector getFirstNonEmptyBlock(World world,
+                                                final Vector fromCorner,
+                                                final Vector toCorner,
+                                                int xStep,
+                                                int zStep,
+                                                boolean repeatY,
+                                                int repeatXStep,
+                                                int repeatZStep) {
+        // Currently zStep needs to be 1 or 0; same for xStep
 
-        Vector vector = null;
-        int iter = 0;
-        try {
-            if (min) {
+        // For the first step, walk through each block in Z axis, if none of the block is air, go 1 block up and restart
+        // If z == maxPoint.getZ() and y == maxPoint.getY(), go 1 block to the right and restart
+        // And do this, until we find a non-air block
+        // For the second step, do the same
+        // For the third step, as we have already found the first non-air block on the left side, we can start from this block
+        // etc
 
+        int stepY = fromCorner.getBlockY() < toCorner.getBlockY() ? 1 : -1;
 
-                int maxY = toCorner.getBlockY();
-                int startY = fromCorner.getBlockY();
+        Vector startOfLine = new Vector(fromCorner);
+        Vector currentPosition = new Vector(startOfLine);
+        int step = 0;
+        while (step < configuration.getMaximumStepsTrim()) { // Custom limit, to prevent infinite loops
+            Block block = world.getBlockAt(currentPosition.getBlockX(), currentPosition.getBlockY(), currentPosition.getBlockZ());
+            if (block.getType() != Material.AIR) {
+                return currentPosition;
+            }
 
-                for (int y = startY; y <= maxY; y++) {
-                    int maxX = toCorner.getBlockX();
-                    int startX = fromCorner.getBlockX();
+            // If we reached the end of the cube
+            if ((currentPosition.getBlockX() == toCorner.getBlockX() && xStep != 0) ||
+                (currentPosition.getBlockZ() == toCorner.getBlockZ() && zStep != 0)) {
 
-                    int maxZ = toCorner.getBlockZ();
-                    int startZ = fromCorner.getBlockZ();
-                    while (startX <= maxX && startZ <= maxZ) {
-                        // Diagonal Iteration
-                        // Start from low corner, up to high corner. Return first non-air
-                        for (int x = startX; x <= maxX; x++) {
+                // If we reached the top/floor of the cube
+                if (!repeatY || currentPosition.getBlockY() == toCorner.getBlockY()) {
 
-                            blockAt = world.getBlockAt(x, y, startZ);
-
-                            iter++;
-                            Material type = blockAt.getType();
-                            if (type == Material.AIR) continue;
-                            blockAt.setType(Material.GOLD_BLOCK);
-
-
-                            vector = new Vector(x, y, startZ);
-                            break;
-                        }
-
-                        for (int z = startZ + 1; z <= maxZ; z++) {
-                            blockAt = world.getBlockAt(startX, y, z);
-
-                            iter++;
-
-                            Material type = blockAt.getType();
-                            if (type == Material.AIR) continue;
-                            blockAt.setType(Material.DIAMOND_BLOCK);
-
-
-                            Vector newVector = new Vector(startX, y, startZ);
-                            vector = vector == null ? newVector : Vector.getMinimum(newVector, vector);
-                            break;
-                        }
-
-                        if (vector != null) return vector;
-
-                        startZ++;
-                        startX++;
+                    // If we tested everything, return toCorner
+                    if (currentPosition.getBlockX() == toCorner.getBlockX() &&
+                        currentPosition.getBlockZ() == toCorner.getBlockZ()) {
+                        return null;
                     }
 
-                }
-            }
-            else {
+                    if (repeatXStep != 0 || repeatZStep != 0) {
+                        // Otherwise, restart with a new line
 
-                int minY = fromCorner.getBlockY();
-                int startY = toCorner.getBlockY();
+                        startOfLine.mutX(startOfLine.getX() + repeatXStep);
+                        startOfLine.mutZ(startOfLine.getZ() + repeatZStep);
 
-                for (int y = startY; y > minY; y--) {
-                    int minX = fromCorner.getBlockX();
-                    int startX = toCorner.getBlockX();
-
-                    int minZ = fromCorner.getBlockZ();
-                    int startZ = toCorner.getBlockZ();
-                    while (startX > minX && startZ > minZ) {
-                        // Diagonal Iteration
-                        // Start from up corner, down to low corner. Return first non-air
-                        for (int x = startX; x > minX; x--) {
-
-                            blockAt = world.getBlockAt(x, y, startZ);
-
-                            iter++;
-                            Material type = blockAt.getType();
-                            if (type == Material.AIR) continue;
-                            blockAt.setType(Material.IRON_BLOCK);
-
-
-                            vector = new Vector(x, y, startZ);
-                            break;
+                        // If the new line is beyond toCorner, return fromCorner
+                        if (repeatXStep > 0 && startOfLine.getX() > toCorner.getX() || repeatXStep < 0 && startOfLine.getX() < toCorner.getX() ||
+                            repeatZStep > 0 && startOfLine.getZ() > toCorner.getZ() || repeatZStep < 0 && startOfLine.getZ() < toCorner.getZ()) {
+                            return null;
                         }
 
-                        for (int z = startZ - 1; z > minZ; z--) {
-                            blockAt = world.getBlockAt(startX, y, z);
-
-                            iter++;
-
-                            Material type = blockAt.getType();
-                            if (type == Material.AIR) continue;
-                            blockAt.setType(Material.REDSTONE_BLOCK);
-
-
-                            Vector newVector = new Vector(startX, y, startZ);
-                            vector = vector == null ? newVector : Vector.getMinimum(newVector, vector);
-                            break;
-                        }
-
-                        if (vector != null) return vector;
-
-                        startZ--;
-                        startX--;
+                        currentPosition.setComponents(startOfLine.getX(), startOfLine.getY(), startOfLine.getZ());
+                        continue;
                     }
-
                 }
+
+                if (repeatY) {
+                    // Go 1 block up
+                    currentPosition.mutY(currentPosition.getBlockY() + stepY);
+
+                    // And restart to the beginning of the cube
+                    currentPosition.mutX(startOfLine.getBlockX());
+                    currentPosition.mutZ(startOfLine.getBlockZ());
+
+                    continue;
+                }
+
             }
-        } finally {
-            System.out.println("iter = " + iter);
+
+            // Go to next block
+            currentPosition.mutZ(currentPosition.getZ() + zStep);
+            currentPosition.mutX(currentPosition.getX() + xStep);
+
+            step++;
+
         }
 
-        return fromCorner;
+        // There is no non-air block in the cube (or we have tested too many blocks)
+        OutputHelper.warning("Nothing found in cube: " + fromCorner + " to " + toCorner);
+        OutputHelper.warning("Step: " + step);
+
+        return null;
     }
 }

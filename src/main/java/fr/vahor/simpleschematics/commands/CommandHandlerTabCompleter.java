@@ -30,10 +30,10 @@ import java.util.List;
 
 public class CommandHandlerTabCompleter implements TabCompleter {
 
-    private final List<String> complete0 = Arrays.asList("help", "menu", "toggle", "schematic", "folder", "pos1", "pos2", "pos3", "reload");
+    private final List<String> complete0 = Arrays.asList("help", "menu", "toggle", "schematic", "folder", "pos", "pos1", "pos2", "pos3", "trim", "from", "to", "reload");
     private final List<String> complete1Folder = Arrays.asList("thumbnail", "icon");
     private final List<String> complete2FolderThumbnail = Arrays.asList("generate", "toggle");
-    private final List<String> complete1Schematic = Arrays.asList("create");
+    private final List<String> complete1Schematic = Collections.singletonList("create");
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {

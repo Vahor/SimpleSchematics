@@ -19,10 +19,12 @@ package fr.vahor.simpleschematics.commands;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.Region;
 import fr.vahor.simpleschematics.API;
 import fr.vahor.simpleschematics.SimpleSchematics;
 import fr.vahor.simpleschematics.exceptions.FolderNotFoundException;
@@ -34,6 +36,7 @@ import fr.vahor.simpleschematics.schematics.SchematicsPlayer;
 import fr.vahor.simpleschematics.schematics.data.ASchematic;
 import fr.vahor.simpleschematics.schematics.data.SchematicFolder;
 import fr.vahor.simpleschematics.schematics.data.SchematicWrapper;
+import fr.vahor.simpleschematics.utils.CommandFlags;
 import fr.vahor.simpleschematics.utils.SkullUtils;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -44,6 +47,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.io.IOException;
+import java.util.Set;
 
 public class CommandHandler implements CommandExecutor {
 
@@ -72,6 +76,31 @@ public class CommandHandler implements CommandExecutor {
             return true;
         }
 
+        Set<String> flags = CommandFlags.extractFlags(args);
+
+        if (args[0].equalsIgnoreCase("trim")) {
+            if(args.length <= 2) {
+                try {
+                    API.trimSelection(schematicsPlayer);
+                    player.sendMessage(Message.PREFIX + Message.COMMAND_TRIM_SUCCESS.toString());
+                    boolean withCorners = flags.contains("-c");
+                    if (withCorners) {
+                        player.getWorld()
+                                .getBlockAt(schematicsPlayer.getPos()[0].getBlockX(), schematicsPlayer.getPos()[0].getBlockY(), schematicsPlayer.getPos()[0].getBlockZ())
+                                .setType(Material.STAINED_GLASS);
+
+                        player.getWorld()
+                                .getBlockAt(schematicsPlayer.getPos()[1].getBlockX(), schematicsPlayer.getPos()[1].getBlockY(), schematicsPlayer.getPos()[1].getBlockZ())
+                                .setType(Material.STAINED_GLASS);
+                    }
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    player.sendMessage(Message.PREFIX + Message.INVALID_TRIM.toString());
+                }
+                return true;
+            }
+        }
+
         if (args.length == 1) {
 
             // Open menu
@@ -88,18 +117,55 @@ public class CommandHandler implements CommandExecutor {
                 return true;
             }
 
+            // WorldEdit conversions
+            if (args[0].equalsIgnoreCase("from")) {
+                Region selection = schematicsPlayer.getFawePlayer().getSelection();
+                if (selection == null) {
+                    player.sendMessage(Message.PREFIX + Message.COMMAND_NO_SELECTION.toString());
+                    return true;
+                }
+                schematicsPlayer.setPosition(0, selection.getMinimumPoint(), true);
+                schematicsPlayer.setPosition(1, selection.getMaximumPoint(), true);
+                schematicsPlayer.setPosition(2, selection.getCenter(), true);
+                player.sendMessage(Message.PREFIX + Message.COMMAND_FROM_SUCCESS.toString());
+                return true;
+            }
+
+            if (args[0].equalsIgnoreCase("to")) {
+                Vector[] positions = schematicsPlayer.getPos();
+                if (positions[0] == null || positions[1] == null) {
+                    player.sendMessage(Message.PREFIX + Message.COMMAND_NO_SELECTION.toString());
+                    return true;
+                }
+
+                CuboidRegion region = new CuboidRegion(schematicsPlayer.getFawePlayer().getWorld(), schematicsPlayer.getPos()[0], schematicsPlayer.getPos()[1]);
+                schematicsPlayer.getFawePlayer().setSelection(region);
+                player.sendMessage(Message.PREFIX + Message.COMMAND_TO_SUCCESS.toString());
+                return true;
+            }
+
             // pos1 2 3
-            if (args[0].equalsIgnoreCase("pos1")) {
+            if (args[0].equalsIgnoreCase("pos")) {
+                Vector pos1 = schematicsPlayer.getPos()[0];
+                Vector pos2 = schematicsPlayer.getPos()[1];
+                Vector pos3 = schematicsPlayer.getPos()[2];
+                player.sendMessage(Message.PREFIX + Message.COMMAND_POSITION.toString()
+                        .replace("{pos1}", pos1 == null ? "null" : pos1.toString())
+                        .replace("{pos2}", pos2 == null ? "null" : pos2.toString())
+                        .replace("{pos3}", pos3 == null ? "null" : pos3.toString()));
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("pos1") || args[0].equalsIgnoreCase("1")) {
                 schematicsPlayer.setPosition(0, schematicsPlayer.getCurrentPosition(), true);
                 schematicsPlayer.setPosIndex(1);
                 return true;
             }
-            if (args[0].equalsIgnoreCase("pos2")) {
+            if (args[0].equalsIgnoreCase("pos2") || args[0].equalsIgnoreCase("2")) {
                 schematicsPlayer.setPosition(1, schematicsPlayer.getCurrentPosition(), true);
                 schematicsPlayer.setPosIndex(2);
                 return true;
             }
-            if (args[0].equalsIgnoreCase("pos3")) {
+            if (args[0].equalsIgnoreCase("pos3") || args[0].equalsIgnoreCase("3")) {
                 schematicsPlayer.setPosition(2, schematicsPlayer.getCurrentPosition(), true);
                 schematicsPlayer.setPosIndex(0);
                 return true;
@@ -157,7 +223,7 @@ public class CommandHandler implements CommandExecutor {
                         String folderNameWithSeparator = args[3];
                         if (commandName.equalsIgnoreCase("thumbnail") || commandName.equalsIgnoreCase("t")) {
                             if (args[2].equalsIgnoreCase("generate")) {
-                                boolean recursive = args.length > 4 && args[4].equalsIgnoreCase("-r");
+                                boolean recursive = flags.contains("-r");
                                 generateThumbnailForFolder(schematicsPlayer, folderNameWithSeparator, recursive);
                                 return true;
                             }
