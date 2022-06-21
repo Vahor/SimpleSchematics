@@ -81,7 +81,6 @@ public class PlayerInteractListener implements Listener {
                         schematicsPlayer,
                         targetBlock
                 );
-                player.sendMessage(targetBlock.toString());
 
             }
         }

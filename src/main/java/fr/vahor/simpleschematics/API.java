@@ -358,7 +358,11 @@ public class API {
         // bottom right corner - first left - -x then -z
         Vector firstNonEmptyInFrontSide = getFirstNonEmptyBlock(world,
                 maxPoint,
-                firstNonEmptyInLeftSide,
+                new Vector(
+                        firstNonEmptyInLeftSide.getX(),
+                        minPoint.getY(),
+                        firstNonEmptyInLeftSide.getZ()
+                ),
                 -1, 0, true, 0, -1);
 
         // top right corner - "center" - -x then z
