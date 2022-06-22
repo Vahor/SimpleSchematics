@@ -79,24 +79,49 @@ public class CommandHandler implements CommandExecutor {
         Set<String> flags = CommandFlags.extractFlags(args);
 
         if (args[0].equalsIgnoreCase("trim")) {
-            if(args.length <= 2) {
+            if (args.length <= 2) {
                 try {
                     API.trimSelection(schematicsPlayer);
                     player.sendMessage(Message.PREFIX + Message.COMMAND_TRIM_SUCCESS.toString());
                     boolean withCorners = flags.contains("-c");
                     if (withCorners) {
                         player.getWorld()
-                                .getBlockAt(schematicsPlayer.getPos()[0].getBlockX(), schematicsPlayer.getPos()[0].getBlockY(), schematicsPlayer.getPos()[0].getBlockZ())
+                                .getBlockAt(schematicsPlayer.getPos()[0].getBlockX(), schematicsPlayer.getPos()[0].getBlockY(),
+                                        schematicsPlayer.getPos()[0].getBlockZ())
                                 .setType(Material.STAINED_GLASS);
 
                         player.getWorld()
-                                .getBlockAt(schematicsPlayer.getPos()[1].getBlockX(), schematicsPlayer.getPos()[1].getBlockY(), schematicsPlayer.getPos()[1].getBlockZ())
+                                .getBlockAt(schematicsPlayer.getPos()[1].getBlockX(), schematicsPlayer.getPos()[1].getBlockY(),
+                                        schematicsPlayer.getPos()[1].getBlockZ())
                                 .setType(Material.STAINED_GLASS);
                     }
                 } catch (NullPointerException e) {
                     e.printStackTrace();
                     player.sendMessage(Message.PREFIX + Message.INVALID_TRIM.toString());
                 }
+                return true;
+            }
+        }
+
+        if (args[0].equalsIgnoreCase("center")) {
+            if (args.length <= 2) {
+                Vector pos1 = schematicsPlayer.getPos()[0];
+                Vector pos2 = schematicsPlayer.getPos()[1];
+                if (pos1 == null || pos2 == null) {
+                    player.sendMessage(Message.PREFIX + Message.COMMAND_NO_SELECTION.toString());
+                    return true;
+                }
+                Vector center = new Vector(
+                        (pos1.getX() + pos2.getX()) / 2.0,
+                        Math.min(pos1.getBlockY(), pos2.getBlockY()),
+                        (pos1.getZ() + pos2.getZ()) / 2.0);
+
+                boolean withY = flags.contains("-y");
+                if (withY) {
+                    center.mutY((pos1.getY() + pos2.getY()) / 2.0);
+                }
+                schematicsPlayer.setPosition(2, center, true);
+                schematicsPlayer.setPosIndex(0);
                 return true;
             }
         }
@@ -294,6 +319,7 @@ public class CommandHandler implements CommandExecutor {
                 .replace("{folder}", folderNameWithSeparator)
                 .replace("{recursive}", recursive ? "true" : "false")
         );
+        player.getFawePlayer().resetTitle();
     }
 
     public void toggleThumbnailForFolder(SchematicsPlayer player, String folderNameWithSeparator) throws FolderNotFoundException, IOException {
@@ -308,6 +334,7 @@ public class CommandHandler implements CommandExecutor {
                 .replace("{folder}", folderNameWithSeparator)
                 .replace("{enabled}", folder.isGenerateThumbnail() ? "true" : "false")
         );
+
     }
 
     private void generateThumbnailForFolder(SchematicsPlayer player, SchematicFolder folder, boolean recursive) {
