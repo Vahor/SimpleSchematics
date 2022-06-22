@@ -62,7 +62,7 @@ public class PNGWriter implements AutoCloseable {
         Graphics2D g2 = img.createGraphics();
         double d = Math.min((double) imageSize / height, Math.min((double) imageSize / width, (double) imageSize / length)) / 2;
         double d_2 = d / 2.0D;
-        double cy = (double) imageSize / 1.5;
+        double cy = (double) imageSize / 2.0D;
         double cx = (double) imageSize / 2.0D;
 
         int[] poly1X = new int[4];

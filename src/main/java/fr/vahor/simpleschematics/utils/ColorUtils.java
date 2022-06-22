@@ -82,6 +82,7 @@ public class ColorUtils {
 
         DARK_GRAY(new Color(85, 85, 85), ChatColor.DARK_GRAY),
         _ROSE_EBONY(new Color(98, 67, 62), ChatColor.DARK_GRAY),
+        _DARK_GRAY(new Color(118, 118, 118), ChatColor.DARK_GRAY),
 
         BLUE(new Color(0, 0, 255), ChatColor.BLUE),
         _BLUE(new Color(85, 85, 255), ChatColor.BLUE),
