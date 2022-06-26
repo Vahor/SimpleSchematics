@@ -70,8 +70,10 @@ public class SelectedSchematicInventory extends ASchematicInventory {
         schematicList.sort(ASchematic::compareTo);
         setTotalItems(schematicList.size());
 
-        schematicList = schematicList.subList(getCurrentPage() * getItemsPerPage(),
-                Math.min(schematicList.size(), (getCurrentPage() + 1) * getItemsPerPage()));
+        schematicList = schematicList.subList(
+                Math.min(getCurrentPage() * getItemsPerPage(), schematicList.size()),
+                Math.min(schematicList.size(), (getCurrentPage() + 1) * getItemsPerPage())
+        );
 
         for (SchematicWrapper child : schematicList) {
             addSchematicIcon(child, slot++);

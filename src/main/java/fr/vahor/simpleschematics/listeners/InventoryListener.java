@@ -47,7 +47,7 @@ public class InventoryListener implements Listener {
             Consumer<InventoryClickEvent> consumer = InventoryBuilder.inventoryActions.get(player.getUniqueId())
                     .get(event.getSlot());
             if(consumer != null)
-                    consumer.accept(event);
+                consumer.accept(event);
         }
     }
 

@@ -140,30 +140,50 @@ public class SchematicInventory extends ASchematicInventory {
                         .build(),
                 (event) -> {
                     event.setCancelled(true);
+                    boolean isRecursive = event.isShiftClick();
                     // Select all
                     if (event.isLeftClick()) {
                         try {
-                            for (ASchematic child : currentFolder.getChildren()) {
-                                if (child instanceof SchematicWrapper) {
-                                    schematicsPlayer.selectSchematic((SchematicWrapper) child);
-                                }
-                            }
+                            selectAll(currentFolder, isRecursive);
+                            player.sendMessage(Message.PREFIX + Message.INVENTORY_SELECT_ALL_SUCCESS.toString()
+                                    .replace("{folder}", currentFolder.getName())
+                                    .replace("{recursive}", isRecursive ? "true" : "false"));
                         } catch (IOException e) {
                             player.sendMessage(Message.PREFIX + Message.UNKNOWN_ERROR.toString());
                             e.printStackTrace();
                         }
                     }
                     else if (event.isRightClick()) {
-                        // Deselect all
-                        for (ASchematic child : currentFolder.getChildren()) {
-                            if (child instanceof SchematicWrapper) {
-                                schematicsPlayer.deselectSchematic((SchematicWrapper) child);
-                            }
-                        }
+                        deselectAll(currentFolder, isRecursive);
+                        player.sendMessage(Message.PREFIX + Message.INVENTORY_DESELECT_ALL_SUCCESS.toString()
+                                .replace("{folder}", currentFolder.getName())
+                                .replace("{recursive}", isRecursive ? "true" : "false"));
                     }
                     addSchematics();
 
                 });
+    }
+
+    private void selectAll(SchematicFolder folder, boolean recursive) throws IOException {
+        for (ASchematic child : folder.getChildren()) {
+            if (child instanceof SchematicWrapper) {
+                schematicsPlayer.selectSchematic((SchematicWrapper) child);
+            }
+            else if (child instanceof SchematicFolder && recursive) {
+                selectAll((SchematicFolder) child, true);
+            }
+        }
+    }
+
+    private void deselectAll(SchematicFolder folder, boolean recursive) {
+        for (ASchematic child : folder.getChildren()) {
+            if (child instanceof SchematicWrapper) {
+                schematicsPlayer.deselectSchematic((SchematicWrapper) child);
+            }
+            else if (child instanceof SchematicFolder && recursive) {
+                deselectAll((SchematicFolder) child, true);
+            }
+        }
     }
 
     private void addGoBackButton() {
